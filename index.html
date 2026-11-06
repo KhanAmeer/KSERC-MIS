@@ -1,59 +1,130 @@
 <!doctype html><html lang=en><head><meta charset=utf-8><meta name=viewport content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Kerala Power MIS</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
-:root{--bg:#fff;color-scheme:light;--cd:#fff;--bd:#2563eb;--bdm:#60a5fa;--bds:#bfdbfe;--bdd:#1d4ed8;--ink:#0f172a;--ink2:#334155;--mut:#64748b;--pl:#eff6ff;--h2:#1e3a8a;--lo:#fee2e2;--hi:#dcfce7;--r:10px;--rx:18px;--mono:'JetBrains Mono',ui-monospace,monospace;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+:root{--primary:#696cff;--primary-d:#5f61e6;--primary-l:#e7e7ff;--secondary:#8592a3;--success:#71dd37;--success-d:#56ca00;--success-l:#e8fadf;--info:#03c3ec;--info-l:#d7f5fc;--warning:#ffab00;--warning-l:#fff2d6;--danger:#ff3e1d;--danger-l:#ffe5e5;
+--dark:#233446;--bg:#f5f5f9;--text:#566a7f;--text2:#697a8d;--muted:#a1acb8;--border:rgba(67,89,113,.12);--shadow:0 2px 6px 0 rgba(67,89,113,.12);--mono:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color-scheme:light}
 *{box-sizing:border-box;margin:0;padding:0}[hidden]{display:none!important}
-body{background:var(--bg);color:var(--ink);font:14px/1.5 'Plus Jakarta Sans',system-ui,-apple-system,sans-serif}
-.app{max-width:1220px;margin:0 auto;padding:28px 18px 60px}
-.hd,.card,.cb,.kpi{background:var(--cd);border:1.5px solid var(--bd);border-radius:var(--rx);box-shadow:0 2px 6px -1px rgba(37,99,235,.1)}
-.hd{padding:22px 26px}.badge{display:inline-block;background:var(--pl);border:1.5px solid var(--bdm);color:var(--bdd);font-size:12px;font-weight:700;padding:4px 12px;border-radius:999px;margin-bottom:10px}
-h1{font-size:clamp(22px,3.2vw,30px);font-weight:800;letter-spacing:-.025em;line-height:1.2}.sub{color:var(--mut);font-size:12.5px;margin-top:4px}
-.cb{position:sticky;top:12px;z-index:40;margin-top:18px;padding:14px 20px;display:flex;flex-wrap:wrap;gap:18px;align-items:flex-end}
-.lbl{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--bdd);margin-bottom:6px}
-.seg{display:inline-flex;flex-wrap:wrap;background:var(--pl);border:1.5px solid var(--bdm);border-radius:var(--r);padding:3px;gap:2px}
-.seg button{font:600 12.5px inherit;font-family:inherit;padding:6px 13px;border:0;background:transparent;color:var(--ink2);border-radius:7px;cursor:pointer}.seg button.on{background:var(--bd);color:#fff}
-.kp{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:14px;margin-top:18px}.kpi{padding:16px 18px}.kpi span{font-size:12px;color:var(--mut);font-weight:600}.kpi b{display:block;font:700 22px var(--mono);color:var(--bdd);margin-top:2px}.kpi i{font-style:normal;font-size:12px;color:var(--mut)}
-.btn{font:700 13px inherit;font-family:inherit;background:var(--bd);color:#fff;border:1.5px solid var(--bdd);padding:9px 18px;border-radius:var(--r);cursor:pointer}.btn:disabled{opacity:.6;cursor:wait}.btn.sec{background:#fff;color:var(--bdd)}
-.card{padding:20px 22px;margin-top:18px}.ch{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;border-bottom:1px dashed var(--bds);padding-bottom:12px;margin-bottom:14px}
-h2{font-size:17px;font-weight:700;color:var(--h2)}.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px}
-.st{background:var(--pl);border:1px solid var(--bds);border-radius:var(--r);padding:9px 12px}.st b{display:block;font:700 17px var(--mono)}.st span{font-size:12px;color:var(--mut)}
-.sc{overflow:auto}table{border-collapse:collapse;width:100%}th,td{padding:8px 10px;text-align:right;border-bottom:1px solid var(--bds);white-space:nowrap;font-size:13.5px}th:first-child,td:first-child{text-align:left}
-th{color:var(--bdd);font-size:11.5px;text-transform:uppercase;letter-spacing:.04em;position:sticky;top:0;background:#fff}td{font-family:var(--mono);font-size:13px}td.ok{color:#166534;text-align:center;font-weight:700}td.no{color:var(--mut);text-align:center}
-tr.lo td{background:var(--lo)}tr.hi td{background:var(--hi)}.lg{display:flex;flex-wrap:wrap;gap:6px 18px;align-items:center;font-size:12.5px;color:var(--ink2);font-weight:600;margin:0 0 12px}
-.sw{display:inline-block;width:13px;height:13px;border-radius:3px;margin-right:6px;vertical-align:-2px}.sw.lo{background:var(--lo);border:1px solid #fca5a5}.sw.hi{background:var(--hi);border:1px solid #86efac}li{margin:7px 0 7px 18px}.cv{position:relative;height:300px}
-.sel{font:600 13px inherit;font-family:inherit;padding:8px 12px;border:1.5px solid var(--bdm);border-radius:var(--r);background:var(--pl);color:var(--ink2);cursor:pointer;min-width:150px}input.sel{min-width:0;width:110px;cursor:text;margin:0 12px 0 4px}
-.ba{margin-left:auto;display:flex;gap:10px;flex-wrap:wrap}.pr{font-weight:600;color:var(--ink2)}.empty{padding:40px 10px;text-align:center;color:var(--mut)}
-.nt{margin-top:12px;padding:10px 14px;border:1.5px solid #f59e0b;background:#fffbeb;color:#92400e;border-radius:var(--r);font-size:13px;font-weight:600}
-.ov{position:fixed;inset:0;background:rgba(15,23,42,.45);z-index:100;display:flex;align-items:center;justify-content:center;padding:18px}
-.mb{background:#fff;border:1.5px solid var(--bd);border-radius:var(--rx);padding:20px 22px;width:min(660px,100%);max-height:90vh;display:flex;flex-direction:column}.mh{font-size:13px;color:var(--ink2);margin-bottom:12px}
-.dz{display:block;border:2px dashed var(--bdm);border-radius:var(--r);background:var(--pl);padding:22px;text-align:center;font-weight:600;color:var(--bdd);cursor:pointer}.dz.dg{background:#dbeafe;border-color:var(--bd)}
-.il{margin-top:12px;overflow:auto;font:12px/1.6 var(--mono);max-height:240px}.il .er{color:#b91c1c}.il .wn{color:#92400e}.il .ok{color:#166534;font-weight:700}
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{font:14px/1.5 'Public Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;background:var(--bg);color:var(--text);overflow-x:hidden;-webkit-tap-highlight-color:transparent}
+.kpi,.card,.st,.cb>div{min-width:0}
 
-html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}body{overflow-x:hidden;-webkit-tap-highlight-color:transparent}.kpi,.card,.st,.cb>div{min-width:0}
-.chips{display:flex;flex-wrap:wrap;gap:6px}.chip{font:600 12.5px inherit;font-family:inherit;padding:6px 12px;border:1.5px solid var(--bdm);border-radius:999px;background:#fff;color:var(--ink2);cursor:pointer}.chip.on{background:var(--bd);border-color:var(--bd);color:#fff}
-.sc{overflow:auto;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}th{white-space:normal;min-width:78px;vertical-align:bottom}td:first-child,th:first-child{position:sticky;left:0;background:#fff;z-index:1;white-space:nowrap}th:first-child{z-index:3}
-tr.lo td:first-child{background:var(--lo)}tr.hi td:first-child{background:var(--hi)}tr.tot td{font-weight:800;background:var(--pl)}tr.fc td{outline:2px solid var(--bd);outline-offset:-2px;font-weight:700}
-.cv{height:clamp(230px,52vw,320px)}.short{display:none}.btn,.chip,.seg button,.sel{min-height:38px}
-@media(max-width:720px){.short{display:inline}.app{padding:12px 10px 96px}.hd{padding:14px 16px}.badge{margin-bottom:6px}.cb{position:static;padding:12px;gap:12px;margin-top:12px;border-radius:14px}.cb>div{width:100%}
-#tabw{position:fixed;left:0;right:0;bottom:0;width:100%;z-index:60;background:#fff;border-top:1.5px solid var(--bd);padding:6px 6px calc(6px + env(safe-area-inset-bottom,0px))}#tabw .lbl{display:none}#tabs{display:flex;width:100%;border:0;background:transparent;padding:0}#tabs button{flex:1;padding:8px 2px;font-size:12px}
-#md,#w{display:flex;width:100%}#md button,#w button{flex:1;padding:8px 4px}.ba{width:100%;margin:0}.ba .btn{flex:1;padding:10px 6px;font-size:12.5px}.kp{grid-template-columns:1fr 1fr;gap:10px}.kpi{padding:12px}.kpi b{font-size:17px}.stats{grid-template-columns:1fr 1fr}
-.card{padding:14px;border-radius:14px;margin-top:12px}h2{font-size:15px}th,td{padding:7px 8px;font-size:12.5px}.sel{font-size:16px;width:100%;min-width:0}input.sel{width:92px}.nt{font-size:12.5px}.ov{align-items:flex-end;padding:0}.mb{border-radius:18px 18px 0 0;max-height:92vh;width:100%}}
-.who{font-size:12px;color:var(--mut);margin-top:6px}.lge{color:#b91c1c;font-size:13px;font-weight:600;min-height:18px;margin-bottom:8px}input.sel[type=email],input.sel[type=password]{cursor:text}
-</style></head><body><div class=app>
-<header class=hd><div class=badge>Kerala Power MIS</div><h1 id=h1></h1><div class=sub id=sub></div><div class=who id=who></div></header>
+/* layout: sidebar + page */
+.layout-wrapper{display:flex;min-height:100vh;width:100%}
+.layout-menu{width:260px;flex-shrink:0;background:#fff;box-shadow:0 .125rem .375rem 0 rgba(161,172,184,.12);position:sticky;top:0;height:100vh;align-self:flex-start;display:flex;flex-direction:column;z-index:1000;overflow-y:auto}
+.app-brand{height:64px;padding:0 1.5rem;display:flex;align-items:center;border-bottom:1px solid rgba(67,89,113,.06);flex-shrink:0}
+.brand{font-size:1.125rem;font-weight:700;color:var(--dark);letter-spacing:-.01em}
+.lbl{font-size:.6875rem;font-weight:700;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin-bottom:5px}
+#tabw .lbl{padding:.875rem 1.75rem .25rem;margin:0}
+#tabs{display:flex;flex-direction:column;gap:.25rem;padding:.25rem .75rem 1.5rem;background:none;border:0}
+#tabs button{display:block;width:100%;margin:0;padding:.625rem 1rem;border:0;border-radius:.375rem;background:transparent;color:var(--text2);font-family:inherit;font-size:.9375rem;font-weight:500;text-align:left;cursor:pointer;transition:all .15s ease-in-out}
+#tabs button:hover{background:rgba(67,89,113,.04);color:var(--text)}
+#tabs button.on{background:linear-gradient(270deg,rgba(105,108,255,.16) 0%,rgba(105,108,255,.08) 100%);color:var(--primary);font-weight:600}
+.layout-page{flex:1 1 auto;min-width:0;display:flex;flex-direction:column}
+.app{width:100%;max-width:1440px;margin:0 auto;padding:0 1.5rem 3rem}
+
+/* floating top navbar */
+.cb{position:sticky;top:.8rem;z-index:900;margin:.8rem 0 1.25rem;padding:.625rem 1.25rem;display:flex;flex-wrap:wrap;align-items:flex-end;gap:.75rem 1.25rem;background:rgba(255,255,255,.95);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);box-shadow:0 0 .375rem .25rem rgba(161,172,184,.15);border-radius:.5rem}
+.ba{margin-left:auto;display:flex;flex-wrap:wrap;gap:.5rem;align-items:center}
+
+/* page heading */
+.hd{padding:.25rem 0 1.125rem}h1{font-size:1.375rem;font-weight:700;color:var(--dark);letter-spacing:-.01em;line-height:1.3}
+.sub{color:var(--muted);font-size:.8125rem;margin-top:2px}.who{font-size:.75rem;color:var(--secondary);margin-top:2px}
+
+/* buttons, groups, fields */
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;min-height:34px;padding:.4375rem 1rem;font-family:inherit;font-size:.8125rem;font-weight:500;line-height:1.5;color:#fff;background:var(--primary);border:1px solid var(--primary);border-radius:.375rem;box-shadow:0 .125rem .25rem 0 rgba(105,108,255,.4);cursor:pointer;transition:all .15s ease-in-out}
+.btn:hover{background:var(--primary-d);border-color:var(--primary-d)}.btn:disabled{opacity:.65;cursor:wait}
+.btn.sec{background:transparent;color:var(--primary);box-shadow:none}.btn.sec:hover{background:var(--primary);color:#fff}
+#so{color:var(--secondary);border-color:var(--secondary)}#so:hover{background:var(--secondary);border-color:var(--secondary);color:#fff}
+.seg{display:inline-flex;flex-wrap:wrap}
+.seg button{min-height:34px;margin-left:-1px;padding:.3125rem .75rem;font-family:inherit;font-size:.8125rem;font-weight:500;color:var(--primary);background:#fff;border:1px solid var(--primary);cursor:pointer;transition:all .15s ease-in-out}
+.seg button:first-child{margin-left:0;border-radius:.375rem 0 0 .375rem}.seg button:last-child{border-radius:0 .375rem .375rem 0}.seg button:only-child{border-radius:.375rem}
+.seg button:hover{background:var(--primary-l)}.seg button.on{background:var(--primary);color:#fff;position:relative;z-index:1}
+.sel{min-width:150px;min-height:34px;padding:.4375rem .75rem;font-family:inherit;font-size:.8125rem;color:var(--text2);background:#fff;border:1px solid #d9dee3;border-radius:.375rem;cursor:pointer;transition:border-color .15s ease-in-out}
+.sel:focus{outline:0;border-color:var(--primary);box-shadow:0 0 .25rem .05rem rgba(105,108,255,.1)}
+input.sel{min-width:0;width:110px;margin:0 12px 0 4px;cursor:text}
+.chips{display:flex;flex-wrap:wrap;gap:.375rem}
+.chip{min-height:32px;padding:.3125rem .75rem;font-family:inherit;font-size:.8125rem;font-weight:500;color:var(--text2);background:#fff;border:1px solid #d9dee3;border-radius:999px;cursor:pointer;transition:all .15s ease-in-out}
+.chip:hover{border-color:var(--primary);color:var(--primary)}.chip.on{background:var(--primary-l);border-color:var(--primary);color:var(--primary);font-weight:600}
+
+/* KPI cards */
+.kp{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:1rem;margin-bottom:1.25rem}
+.kpi{background:#fff;border-radius:.5rem;box-shadow:var(--shadow);padding:1.25rem}
+.kpi span{display:block;margin-bottom:.375rem;font-size:.6875rem;font-weight:600;color:var(--secondary);text-transform:uppercase;letter-spacing:.3px}
+.kpi b{display:block;font-family:var(--mono);font-size:1.5rem;font-weight:700;color:var(--dark);line-height:1.25}
+.kpi i{display:block;margin-top:.625rem;padding-top:.625rem;border-top:1px solid var(--border);font-style:normal;font-family:var(--mono);font-size:.6875rem;color:var(--secondary)}.kpi i:empty{display:none}
+
+/* cards */
+.card{background:#fff;border-radius:.5rem;box-shadow:var(--shadow);padding:1.5rem;margin-bottom:1.25rem}
+.ch{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:.75rem;margin-bottom:1rem}
+h2{font-size:1rem;font-weight:700;color:var(--dark)}
+.stats{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:.625rem}
+.st{background:var(--bg);border-radius:.375rem;padding:.625rem .875rem}.st b{display:block;font-family:var(--mono);font-size:1rem;font-weight:700;color:var(--dark)}.st span{font-size:.75rem;color:var(--secondary)}
+.cv{position:relative;height:clamp(230px,52vw,320px)}
+.pr{font-weight:500;color:var(--text)}.empty{padding:2.5rem .625rem;text-align:center;color:var(--muted)}
+li{margin:.5rem 0 .5rem 1.125rem;color:var(--text)}li::marker{color:var(--primary)}
+.lg{display:flex;flex-wrap:wrap;gap:.375rem 1.125rem;align-items:center;margin-bottom:.75rem;font-size:.8125rem;font-weight:500;color:var(--text2)}
+.sw{display:inline-block;width:13px;height:13px;margin-right:6px;border-radius:3px;vertical-align:-2px}.sw.lo{background:var(--danger-l);border:1px solid #ffb4a6}.sw.hi{background:var(--success-l);border:1px solid #b7ea97}
+.nt{margin:0 0 1.25rem;padding:.75rem 1rem;border-radius:.375rem;background:var(--warning-l);color:#a86400;font-size:.8125rem;font-weight:500}
+
+/* tables */
+.sc{overflow:auto;-webkit-overflow-scrolling:touch;overscroll-behavior-x:contain}
+table{width:100%;border-collapse:collapse;font-family:var(--mono);font-size:.78rem}
+th,td{padding:.625rem .875rem;text-align:right;white-space:nowrap;border-bottom:1px solid var(--border)}
+th:first-child,td:first-child{text-align:left}
+th{position:sticky;top:0;z-index:2;min-width:78px;background:var(--bg);color:var(--text);font-family:'Public Sans',sans-serif;font-size:.6875rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;white-space:normal;vertical-align:bottom}
+td{color:var(--text)}tr:hover td{background:rgba(67,89,113,.03)}
+td:first-child,th:first-child{position:sticky;left:0;z-index:1;background:#fff;white-space:nowrap}th:first-child{z-index:3;background:var(--bg)}tr:hover td:first-child{background:#f8f8fa}
+tr.lo td,tr.lo td:first-child{background:var(--danger-l)}tr.hi td,tr.hi td:first-child{background:var(--success-l)}tr.tot td,tr.tot td:first-child{background:var(--primary-l);color:var(--dark);font-weight:700}
+tr.fc td{outline:2px solid var(--primary);outline-offset:-2px;font-weight:700}
+table:has(td.ok) th:not(:first-child),table:has(td.no) th:not(:first-child){text-align:center}
+td.ok{color:var(--success-d);text-align:center;font-weight:700}td.no{color:var(--muted);text-align:center}
+
+/* dialogs */
+.ov{position:fixed;inset:0;z-index:2000;display:flex;align-items:center;justify-content:center;padding:1.125rem;background:rgba(35,52,70,.5)}
+.mb{display:flex;flex-direction:column;width:min(680px,100%);max-height:90vh;overflow:auto;padding:1.5rem;background:#fff;border-radius:.5rem;box-shadow:0 .25rem 1rem rgba(161,172,184,.45)}
+.mh{margin-bottom:1rem;font-size:.8125rem;line-height:1.55;color:var(--text2)}
+.dz{display:block;padding:1.5rem;text-align:center;font-weight:600;color:var(--text2);background:#fbfbfc;border:2px dashed #d9dee3;border-radius:.5rem;cursor:pointer;transition:all .2s ease}
+.dz:hover,.dz.dg{border-color:var(--primary);background:#f7f7ff;color:var(--primary)}
+.il{margin-top:.75rem;max-height:240px;overflow:auto;font:12px/1.6 var(--mono)}.il .er{color:var(--danger)}.il .wn{color:#d97706}.il .ok{color:var(--success-d);font-weight:700}
+.lge{min-height:18px;margin-bottom:.5rem;font-size:.8125rem;font-weight:600;color:var(--danger)}
+.short{display:none}
+
+/* tablet & phone: sidebar becomes a bottom bar */
+@media(max-width:1199.98px){
+ .layout-wrapper{display:block}
+ .layout-menu{position:fixed;top:auto;left:0;right:0;bottom:0;width:100%;height:auto;flex-direction:row;overflow:visible;padding-bottom:env(safe-area-inset-bottom,0px);border-top:1px solid var(--border);box-shadow:0 -2px 8px rgba(161,172,184,.2)}
+ .app-brand,#tabw .lbl{display:none}#tabw{width:100%}
+ #tabs{flex-direction:row;width:100%;gap:.125rem;padding:.375rem}
+ #tabs button{flex:1;padding:.5rem .125rem;font-size:.75rem;text-align:center}
+ .full{display:none}.short{display:inline}
+ .app{padding:0 .875rem 6.5rem}.cb{position:static;margin:.75rem 0 1rem;padding:.75rem 1rem}
+ .hd::before{content:'Kerala Power MIS';display:inline-block;margin-bottom:.5rem;padding:.2rem .625rem;border-radius:999px;background:var(--primary-l);color:var(--primary);font-size:.6875rem;font-weight:700}
+}
+@media(max-width:720px){
+ .cb>div{width:100%}#md,#w{display:flex;width:100%}#md button,#w button{flex:1;padding:.5rem .25rem}.ba{width:100%;margin:0}.ba .btn{flex:1;padding:.625rem .375rem}
+ .kp{grid-template-columns:1fr 1fr;gap:.625rem}.kpi{padding:.875rem}.kpi b{font-size:1.125rem}.stats{grid-template-columns:1fr 1fr}
+ .card{padding:1rem}h2{font-size:.9375rem}th,td{padding:.5rem .625rem;font-size:.72rem}.sel{width:100%;min-width:0;font-size:16px}input.sel{width:92px}.nt{font-size:.75rem}
+ .ov{align-items:flex-end;padding:0}.mb{width:100%;max-height:92vh;border-radius:1rem 1rem 0 0}
+}
+</style></head><body><div class=layout-wrapper>
+<aside class=layout-menu id=tabw><div class=app-brand><div class=brand>Kerala Power MIS</div></div><div class=lbl>Section</div><div class=seg id=tabs><button data-v=sum>Summary</button><button data-v=dem>Demand</button><button data-v=hyd><span class=full>Hydro · Purchase · Surrender</span><span class=short>Hydro</span></button><button data-v=iex>IEX<span class=full> prices</span></button><button data-v=data>Data</button></div></aside>
+<div class=layout-page><div class=app>
 <div class=cb>
-<div id=tabw><div class=lbl>Section</div><div class=seg id=tabs><button data-v=sum>Summary</button><button data-v=dem>Demand</button><button data-v=hyd><span class=full>Hydro · Purchase · Surrender</span><span class=short>Hydro</span></button><button data-v=iex>IEX<span class=full> prices</span></button><button data-v=data>Data</button></div></div>
 <div><div class=lbl>Period</div><div class=seg id=md><button data-v=m>Month</button><button data-v=a>All months</button><button data-v=c>Compare</button></div></div>
 <div id=mbox><div class=lbl>Month</div><select id=mo class=sel></select></div>
 <div id=cbox hidden><div class=lbl>Months to compare</div><div class=chips id=chips></div></div>
 <div id=wbox hidden><div class=lbl>Time window</div><div class=seg id=w><button data-v=00-24>Full day</button><button data-v=00-08>00–08</button><button data-v=08-18>08–18</button><button data-v=18-22>18–22</button><button data-v=22-24>22–24</button></div></div>
-<div class=ba><button id=imp class="btn sec" type=button hidden>Import</button><button id=pdf class=btn type=button>Export PDF</button><button id=so class="btn sec" type=button>Sign out</button></div></div>
-<div id=nt class=nt hidden></div><div id=v><div class=card><p class=empty>Loading…</p></div></div></div>
+<div class=ba><button id=imp class=btn type=button hidden>Import</button><button id=pdf class="btn sec" type=button>Export PDF</button><button id=so class="btn sec" type=button>Sign out</button></div></div>
+<header class=hd><h1 id=h1></h1><div class=sub id=sub></div><div class=who id=who></div></header>
+<div id=nt class=nt hidden></div><div id=v><div class=card><p class=empty>Loading…</p></div></div></div></div></div>
 <div id=lg class=ov hidden><div class=mb style="max-width:420px"><div class=ch><h2>Sign in</h2></div><p class=mh>Kerala Power MIS. Use the email and password you were given. Accounts are created by the administrator.</p>
 <form id=lgf><div class=lbl>Email</div><input id=em class=sel type=email autocomplete=username required style="width:100%;margin-bottom:12px"><div class=lbl>Password</div><input id=pw class=sel type=password autocomplete=current-password required style="width:100%;margin-bottom:14px"><div id=lge class=lge></div><button id=lgb class=btn type=submit style="width:100%">Sign in</button></form></div></div>
 <div id=ov class=ov hidden><div class=mb role=dialog aria-modal=true><div class=ch><h2>Import files</h2><button id=mx class="btn sec" type=button>Close</button></div>
-<p class=mh>Drop any mix of: daily <b>Energy Log</b> (.xls), <b>Statistics-SERC</b> (.xls), <b>IEX DAM / RTM snapshot</b> (.xlsx), the <b>Purchase &amp; Surrender</b> workbook (.xlsx), daily <b>SLDC PDF</b>, or a <b>.zip</b> of them. Files are recognised automatically. Import once – the numbers are saved to the shared database and every section (and every signed-in person) updates. Every section (Summary, Demand, Hydro, IEX, Data) updates from the same data. Files already imported are skipped automatically; a changed file or a newer version of the monthly workbook is re-read and overwrites the days it contains. Energy Log file names need the date (e.g. Energy_log_for03_11_2026.xls).</p>
+<p class=mh>Drop any mix of: daily <b>Energy Log</b> (.xls), <b>Statistics-SERC</b> (.xls), <b>IEX DAM / RTM snapshot</b> (.xlsx), the <b>KSEBL LGB projection</b> workbook (.xlsx), the <b>Purchase &amp; Surrender</b> workbook (.xlsx), daily <b>SLDC PDF</b>, or a <b>.zip</b> of them. Files are recognised automatically. Import once – the numbers are saved to the shared database and every section (and every signed-in person) updates. Every section (Summary, Demand, Hydro, IEX, Data) updates from the same data. Files already imported are skipped automatically; a changed file or a newer version of the monthly workbook is re-read and overwrites the days it contains. Energy Log file names need the date (e.g. Energy_log_for03_11_2026.xls).</p>
 <label id=dz class=dz for=fi>Click to choose files, or drop them here<input id=fi type=file multiple accept=".xls,.xlsx,.xlsm,.pdf,.zip,.json" hidden></label><div id=il class=il></div></div></div>
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script><script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script><script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script><script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script><script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script><script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script><script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script><script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script><script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script><script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+<script>
 /* ---------- PARSERS: one function per file layout. Edit here if SLDC/IEX change a layout. ---------- */
 const pad=n=>String(n).padStart(2,'0'),MON={january:1,february:2,march:3,april:4,may:5,june:6,july:7,august:8,september:9,october:10,november:11,december:12};
 const sIso=n=>new Date(Math.round((n-25569)*864e5)).toISOString().slice(0,10);
@@ -112,7 +183,30 @@ function statParse(R,fn){
   if(n&&typeof x==='number'&&!/total|sum|hydel|captive/i.test(n))v.hs[n]=x}
  return{t:'st',date:d,v}}
 
+
+/* KSEBL LGB projection workbook: 'Blockwise' sheet has, for each month, a 'Peak' row and an 'Avg' row of 96 x 15-min values.
+   A month that appears twice in a row (April, May) is split: first block = days 1-15, second = day 16 onwards. */
+function lgbParse(wb,fn){
+ const sn=wb.SheetNames.find(n=>/blockwise/i.test(n));if(!sn)return null;
+ const R=rowsOf(wb,sn),MN=['jan','feb','mar','apr','may','jun','jul','aug','sep','oct','nov','dec'],secs=[];
+ for(let i=0;i<R.length-1;i++){const r=R[i]||[],a=R[i+1]||[];
+  if(String(r[2]??'').trim().toLowerCase()!=='peak'||String(a[2]??'').trim().toLowerCase()!=='avg')continue;
+  const pk=r.slice(3,99).map(num),av=a.slice(3,99).map(num),mi=MN.indexOf(String(r[1]??'').trim().slice(0,3).toLowerCase());
+  if(pk.length<96||pk.some(isNaN)||av.some(isNaN)||mi<0)continue;           // skips the 7-value band-summary rows and unlabeled rows
+  secs.push({mi,label:String(r[1]).trim(),pk,av})}
+ if(!secs.length)throw new Error('no month blocks with Peak/Avg rows (96 values) found on the Blockwise sheet');
+ let y=null;const ex=wb.SheetNames.find(n=>/excegen/i.test(n));
+ if(ex)for(const r of rowsOf(wb,ex)){const c=r[0];if(typeof c==='number'&&c>40000&&c<80000&&new Date(Math.round((c-25569)*864e5)).getUTCMonth()===secs[0].mi){y=+sIso(c).slice(0,4);break}}
+ if(y==null){const m=/(20\d\d)\s*-\s*\d\d/.exec(fn);if(m)y=secs[0].mi>=3?+m[1]:+m[1]+1}
+ if(y==null)throw new Error('cannot work out the year – keep the financial year (e.g. 2026-27) in the file name');
+ const months={};let prev=null,idx=0;
+ for(const s of secs){if(prev!=null&&s.mi<prev)y++;
+  const k=y+'-'+pad(s.mi+1);const same=prev===s.mi;idx=same?idx+1:0;prev=s.mi;
+  if(idx>1)continue;(months[k]=months[k]||[]).push({from:idx?16:1,pk:s.pk,av:s.av,label:s.label})}
+ return{t:'lgb',months}}
+
 function parseWB(wb,fn){
+ if(wb.SheetNames.some(n=>/blockwise/i.test(n))){const l=lgbParse(wb,fn);if(l)return l}
  for(const sn of wb.SheetNames){const R=rowsOf(wb,sn);
   let hi=R.slice(0,25).findIndex(r=>{const t=low(r);return t.includes('date')&&t.some(c=>c.includes('mcp'))});
   if(hi>=0)return iexParse(R,hi,fn);
@@ -137,7 +231,7 @@ function pdfParse(t,fn){
 /* ---------- CLOUD LAYER: Supabase (shared data) + local cache for speed ---------- */
 const SB_URL='https://wrctfyetnixeoaofingo.supabase.co',SB_KEY='sb_publishable_Mn8am94d8ffaPKYJgyVdsA_llHc6eiQ';   // publishable key: safe to be public, data is protected by login + Row Level Security
 const sb=supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}});
-const TABLES=['e','st','sl','ps','iex','proj','files'],DB0=()=>({e:{},st:{},sl:{},ps:{},iex:{},proj:{},files:{},meta:{}});
+const TABLES=['e','st','sl','ps','iex','proj','files','lgb'],DB0=()=>({e:{},st:{},sl:{},ps:{},iex:{},proj:{},files:{},lgb:{},meta:{}});
 let DB=DB0(),S={tab:'sum',mode:'m',mo:'',cmp:[],day:null,w:'00-24',k:'d',focus:null,msg:'',scroll:false},ME={id:null,email:'',up:false},SYNC={err:'',wm:{},busy:false,timer:null};
 const merge=(a,b)=>{for(const k of TABLES)for(const d in b[k]||{})a[k][d]=(k==='iex'||k==='ps')?{...a[k][d],...b[k][d]}:b[k][d]};
 const num0=x=>x==null?null:+x;
@@ -148,6 +242,7 @@ const TB={   // server table -> local structure
  purchase_surrender:{k:['day'],n:1000,map:r=>{DB.ps[r.day]={pur:num0(r.pur),sur:num0(r.sur),sale:r.sale==null?undefined:+r.sale}}},
  iex:{k:['day','market'],n:80,map:r=>{(DB.iex[r.day]=DB.iex[r.day]||{})[r.market]={p:r.p,v:r.v,pb:r.pb,sb:r.sb}}},
  projections:{k:['month'],n:500,map:r=>{DB.proj[r.month]={h:num0(r.h),a:num0(r.a)}}},
+ lgb_profiles:{k:['month','part'],n:60,opt:true,map:r=>{(DB.lgb[r.month]=DB.lgb[r.month]||[])[r.part]={from:r.from_day,pk:r.peak,av:r.avg,label:r.label}}},
  imported_files:{k:['key'],n:1000,wc:'imported_at',map:r=>{DB.files[r.key]=r.imported_at}}};
 
 /* local cache (IndexedDB) – only a speed-up; cleared on sign-out */
@@ -165,20 +260,20 @@ async function syncTable(name){const T=TB[name],wc=T.wc||'updated_at',wm=SYNC.wm
   if(data.length<T.n)break;from+=T.n}
  if(max)SYNC.wm[name]=max;return changed}
 async function sync(full){if(SYNC.busy)return 0;SYNC.busy=true;let n=0;
- try{if(full){DB=DB0();SYNC.wm={}}n=sum(await Promise.all(Object.keys(TB).map(syncTable)));SYNC.err='';if(n||full)await cacheSave()}
+ try{if(full){DB=DB0();SYNC.wm={}}n=sum(await Promise.all(Object.keys(TB).map(n=>syncTable(n).catch(e=>{if(TB[n].opt)return 0;throw e}))));SYNC.err='';if(n||full)await cacheSave()}
  catch(e){SYNC.err=navigator.onLine===false?'Offline – showing the last downloaded data.':'Could not reach the database ('+e.message+'). Showing the last downloaded data.'}
  finally{SYNC.busy=false}return n}
 const lastUpd=()=>Object.values(SYNC.wm).sort().at(-1),fmtT=s=>new Date(s).toLocaleString('en-GB',{day:'numeric',month:'short',hour:'2-digit',minute:'2-digit'});
 
 /* upload (uploaders only – the database refuses everyone else) */
-const PEND={e:new Set(),st:new Set(),sl:new Set(),ps:new Set(),iex:new Set(),files:new Set(),proj:new Set()};
+const PEND={e:new Set(),st:new Set(),sl:new Set(),ps:new Set(),iex:new Set(),files:new Set(),proj:new Set(),lgb:new Set()};
 async function up(table,rows,n=40){for(let i=0;i<rows.length;i+=n){const {error}=await sb.from(table).upsert(rows.slice(i,i+n));if(error)throw new Error(table+': '+error.message)}}
 async function flush(){if(!ME.up){Object.values(PEND).forEach(s=>s.clear());throw new Error('only uploaders can save data')}
  const now=new Date().toISOString(),P=PEND,E=[...P.e].map(d=>({day:d,kt:DB.e[d].kt,hy:DB.e[d].hy||null,im:DB.e[d].im||null,so:DB.e[d].so||null,wi:DB.e[d].wi||null,updated_at:now}));
  const job=[['energy',E],['statistics_day',[...P.st].map(d=>({day:d,v:DB.st[d].v,updated_at:now}))],['sldc',[...P.sl].map(d=>({day:d,v:DB.sl[d],updated_at:now}))],
   ['purchase_surrender',[...P.ps].map(d=>({day:d,pur:DB.ps[d].pur??null,sur:DB.ps[d].sur??null,sale:DB.ps[d].sale??null,updated_at:now}))],
   ['iex',[...P.iex].map(k=>{const[d,m]=k.split('|'),x=DB.iex[d][m];return{day:d,market:m,p:x.p,v:x.v,pb:x.pb,sb:x.sb,updated_at:now}})],
-  ['projections',[...P.proj].map(m=>({month:m,h:DB.proj[m].h??null,a:DB.proj[m].a??null,updated_at:now}))],['imported_files',[...P.files].map(k=>({key:k}))]];
+  ['lgb_profiles',[...P.lgb].flatMap(m=>(DB.lgb[m]||[]).filter(Boolean).map((p,i)=>({month:m,part:i,from_day:p.from,peak:p.pk,avg:p.av,label:p.label||null,updated_at:now})))],['projections',[...P.proj].map(m=>({month:m,h:DB.proj[m].h??null,a:DB.proj[m].a??null,updated_at:now}))],['imported_files',[...P.files].map(k=>({key:k}))]];
  try{for(const[t,rows]of job)if(rows.length)await up(t,rows);Object.values(P).forEach(s=>s.clear())}catch(e){Object.values(P).forEach(s=>s.clear());throw e}}
 
 /* sign-in / sign-out / live refresh */
@@ -197,7 +292,7 @@ const f1=x=>x==null||isNaN(x)?'–':x.toLocaleString('en-IN',{maximumFractionDig
 const L48=[...Array(48)].map((_,i)=>{const m=(i+1)*30;return pad(Math.floor(m/60))+':'+pad(m%60)}),L96=[...Array(96)].map((_,i)=>pad(i>>2)+':'+pad(i%4*15));
 const dl=d=>+d.slice(8)+' '+['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'][+d.slice(5,7)-1],mname=k=>new Date(k+'-01T00:00:00Z').toLocaleString('en-GB',{month:'long',year:'numeric',timeZone:'UTC'});
 const WB={'00-24':[0,48],'00-08':[0,16],'08-18':[16,36],'18-22':[36,44],'22-24':[44,48]},WN={'00-24':'Full day (00:00–24:00)','00-08':'00:00–08:00','08-18':'08:00–18:00','18-22':'18:00–22:00','22-24':'22:00–24:00'};
-const P=['#2563eb','#ea580c','#16a34a','#7c3aed','#0891b2','#64748b'],TT={sum:'Summary',dem:'Demand',hyd:'Hydro, Purchase & Surrender',iex:'IEX Prices',data:'Data & Backup'};
+const P=['#696cff','#ffab00','#71dd37','#03c3ec','#ff3e1d','#8592a3'],TT={sum:'Summary',dem:'Demand',hyd:'Hydro, Purchase & Surrender',iex:'IEX Prices',data:'Data & Backup'};
 const alld=()=>[...new Set(TABLES.slice(0,5).flatMap(k=>Object.keys(DB[k])))].sort();
 const kpi=(a,b,c)=>`<div class=kpi><span>${a}</span><b>${b}</b><i>${c||''}</i></div>`,kp=(...a)=>`<div class=kp>${a.join('')}</div>`;
 const card=(t,inner,x='')=>`<div class=card><div class=ch><h2>${t}</h2>${x}</div>${inner}</div>`,cv=id=>`<div class=cv><canvas id=${id}></canvas></div>`;
@@ -215,24 +310,47 @@ const range=()=>alld().filter(d=>S.mo==='all'||d.startsWith(S.mo));
 
 /* ---------- CHARTS ---------- */
 const CH={};
-function mk(id,type,labels,ds,o={}){CH[id]&&CH[id].destroy();const tx='#64748b';
+function mk(id,type,labels,ds,o={}){CH[id]&&CH[id].destroy();Chart.defaults.font.family="'Public Sans',system-ui,sans-serif";Chart.defaults.font.size=11;const tx='#a1acb8';
  ds.forEach((s,i)=>{s.borderColor??=P[i%6];if(type==='bar'||s.type==='bar')s.backgroundColor??=P[i%6];if(type==='line'&&s.type!=='bar')s.backgroundColor??=s.borderColor});
  CH[id]=new Chart($('#'+id),{type,data:{labels,datasets:ds},options:Object.assign({responsive:true,maintainAspectRatio:false,interaction:{mode:'index',intersect:false},spanGaps:true,
-  plugins:{legend:{labels:{color:tx,usePointStyle:true}}},scales:{x:{stacked:!!o.stack,grid:{display:false},ticks:{color:tx,maxTicksLimit:innerWidth<600?6:16,maxRotation:0}},y:{stacked:!!o.stack,grid:{color:'rgba(148,163,184,.25)'},ticks:{color:tx},title:{display:!!o.y,text:o.y,color:tx}}},
+  plugins:{legend:{labels:{color:tx,usePointStyle:true,boxWidth:12}}},scales:{x:{stacked:!!o.stack,grid:{display:false},ticks:{color:tx,maxTicksLimit:innerWidth<600?6:16,maxRotation:0}},y:{stacked:!!o.stack,grid:{color:'rgba(67,89,113,.08)'},ticks:{color:tx},title:{display:!!o.y,text:o.y,color:tx}}},
   elements:{point:{radius:o.pts??2,hoverRadius:6},line:{borderWidth:2,tension:.25}}},o.opt||{})})}
 
 /* ---------- VIEWS: each returns {h: html, d: draw charts} ---------- */
+/* ---- KSEBL LGB projection helpers ---- */
+const lgbParts=m=>(DB.lgb[m]||[]).filter(Boolean).sort((a,b)=>a.from-b.from);
+const lgbPart=d=>{let x=null;for(const p of lgbParts(d.slice(0,7)))if(+d.slice(8)>=p.from)x=p;return x};
+const projFor=d=>{const p=lgbPart(d);if(p)return{h:Math.max(...p.pk),a:avg(p.av)};const m=DB.proj[d.slice(0,7)];return m&&m.h?{h:m.h,a:m.a}:null};
+const h48=a=>L48.map((_,i)=>(a[2*i]+a[2*i+1])/2);                                   // 96 x 15-min -> 48 x 30-min (mean of each pair)
+const blk96=i=>L96[i]+'–'+(i===95?'24:00':L96[i+1]);
+const BANDS=[['00:00–05:00',0,5],['05:00–08:30',5,8.5],['08:30–14:00',8.5,14],['14:00–17:00',14,17],['17:00–18:30',17,18.5],['18:30–22:30',18.5,22.5],['22:30–24:00',22.5,24]];
+function projProfile(days){const ps=[...new Set(days.map(lgbPart).filter(Boolean))];if(!ps.length)return null;
+ const pk=L96.map((_,i)=>Math.max(...ps.map(p=>p.pk[i]))),av=L96.map((_,i)=>avg(ps.map(p=>p.av[i])));return{pk,av,pk48:h48(pk),av48:h48(av)}}
+function lgbText(m){const P=lgbParts(m);return P.map((p,i)=>{const h=Math.max(...p.pk),at=p.pk.indexOf(h),a=avg(p.av);return `${P.length>1?(i?'From day 16':'Days 1–15')+': ':''}projected highest <b>${f1(h)} MW</b> (${blk96(at)}), projected average <b>${f1(a)} MW</b> (${f1(a*24/1000)} MU/day)`}).join(' &nbsp;·&nbsp; ')}
 const V={},EMPTY=m=>({h:`<div class=card><p class=empty>${m}</p></div>`,d(){}});
 V.sum=R=>{const pk=best(R,'peak'),lb=R.map(r=>dl(r.d));return{h:kp(kpi('Peak demand',pk?f1(pk.peak)+' MW':'–',pk?dl(pk.d)+(pk.pk!=null?' · '+L48[pk.pk]:''):''),kpi('Energy consumed',f1(tot(R,'cons'))+' MU','avg '+f1(mean(R,'cons'))+' MU/day'),kpi('Hydro generation',f1(tot(R,'hyd'))+' MU','avg '+f1(mean(R,'hyd'))+' MU/day'),kpi('Purchase',f1(tot(R,'pur'))+' MU','avg '+f1(mean(R,'pur'))+' MU/day'),kpi('Surrender',f1(tot(R,'sur'))+' MU','avg '+f1(mean(R,'sur'))+' MU/day'),kpi('IEX DAM average',f2(mean(R,'dam')),'₹/kWh'),kpi('IEX RTM average',f2(mean(R,'rtm')),'₹/kWh'))+card('Daily consumption (MU)',cv('c1'))+card('Hydro vs purchase &amp; surrender (MU per day)',cv('c2')),
  d:()=>{mk('c1','bar',lb,[{label:'Consumption (MU)',data:R.map(r=>r.cons)}]);mk('c2','line',lb,[['hyd','Hydro (MU)',0],['pur','Purchase (MU)',1],['sur','Surrender (MU)',2]].map(([k,n,c])=>({label:n,data:R.map(r=>r[k]),borderColor:P[c],borderWidth:c?2:3,borderDash:c===2?[5,4]:[]})),{y:'MU'})}}};
 
-V.dem=R=>{const D=R.filter(r=>r.peak!=null),E=D.filter(r=>DB.e[r.d]),pr=S.mo!=='all'&&DB.proj[S.mo];if(!D.length)return EMPTY('No demand data in this selection yet. Import an Energy Log (or an SLDC PDF for the daily peak).');
- if(E.length&&!E.find(r=>r.d===S.day))S.day=E.at(-1).d;const hi=D.filter(r=>pr&&r.peak>pr.h).length,ha=D.filter(r=>pr&&r.avg>pr.a).length,B=best(D,'peak'),Lo=best(D,'min',0);
+V.dem=R=>{const D=R.filter(r=>r.peak!=null),E=D.filter(r=>DB.e[r.d]),LG=lgbParts(S.mo).length>0,pm=DB.proj[S.mo],pr=pm&&pm.h?pm:null;if(!D.length)return EMPTY('No demand data in this selection yet. Import an Energy Log (or an SLDC PDF for the daily peak).');
+ if(E.length&&!E.find(r=>r.d===S.day))S.day=E.at(-1).d;const PF=r=>projFor(r.d),hi=D.filter(r=>{const p=PF(r);return p&&r.peak>p.h}).length,ha=D.filter(r=>{const p=PF(r);return p&&r.avg!=null&&r.avg>p.a}).length,B=best(D,'peak'),Lo=best(D,'min',0);
+ const PP=E.length&&LG?projProfile(E.map(r=>r.d)):null,MW=E.map(r=>DB.e[r.d].kt.map(v=>v*2)),AV=L48.map((_,i)=>avg(MW.map(a=>a[i]))),HX=L48.map((_,i)=>Math.max(...MW.map(a=>a[i])));
+ let bands='',inf=[];
+ if(PP){const rows=BANDS.map(([n,a,b])=>{const i0=a*2,i1=b*2,j0=a*4,j1=b*4,pkB=Math.max(...PP.pk.slice(j0,j1)),avB=avg(PP.av.slice(j0,j1)),dm=MW.map(m=>Math.max(...m.slice(i0,i1))),hx=Math.max(...dm),hd=E[dm.indexOf(hx)].d,ab=avg(MW.map(m=>avg(m.slice(i0,i1)))),over=dm.filter(v=>v>pkB).length;return{n,pkB,avB,hx,hd,ab,over,dh:hx-pkB,da:ab-avB}});
+  bands=`<div class=sc><table><tr><th>Time band<th>Proj. peak (MW)<th>Actual highest (MW)<th>Diff (MW)<th>Diff %<th>Days above proj. peak<th>Proj. average (MW)<th>Actual average (MW)<th>Diff (MW)<th>Diff %${rows.map(r=>`<tr class="${r.hx>r.pkB?'lo':''}"><td>${r.n}<td>${f1(r.pkB)}<td>${f1(r.hx)}<td>${(r.dh>=0?'+':'')+f1(r.dh)}<td>${(r.dh>=0?'+':'')+f1(r.dh/r.pkB*100)}%<td>${r.over} / ${E.length}<td>${f1(r.avB)}<td>${f1(r.ab)}<td>${(r.da>=0?'+':'')+f1(r.da)}<td>${(r.da>=0?'+':'')+f1(r.da/r.avB*100)}%`).join('')}</table></div><p class=sub style="margin-top:10px">Red rows: the highest actual demand in that band exceeded KSEBL's projected peak. Projected peak = highest point of the Peak profile in the band. Projected average = mean of the Avg profile in the band (KSEBL's own band table lists the Avg profile's highest point, e.g. 5,158 MW for 18:30–22:30 in October; the mean is the like-for-like figure for actual average demand).</p>`;
+  const mx=rows.reduce((p,r)=>r.dh>p.dh?r:p),mn2=rows.reduce((p,r)=>r.dh<p.dh?r:p),ex=L48.filter((_,i)=>HX[i]>PP.pk48[i]).length,tp=Math.max(...PP.pk),ta=avg(PP.av),dc=mean(E,'avg'),dp=B&&B.peak;
+  inf=[`Highest demand this month: ${f1(B.peak)} MW on ${dl(B.d)}${B.pk!=null?' at '+L48[B.pk]:''}, against KSEBL's projected highest of ${f1(tp)} MW (${(B.peak-tp>=0?'+':'')+f1(B.peak-tp)} MW, ${(B.peak-tp>=0?'+':'')+f1((B.peak-tp)/tp*100)}%). ${hi} of ${D.length} days had a daily highest above the projection.`,
+   `Average demand: the daily average over ${E.length} day(s) was ${f1(dc)} MW against a projected ${f1(ta)} MW (${(dc-ta>=0?'+':'')+f1((dc-ta)/ta*100)}%), i.e. about ${f1(dc*24/1000)} MU/day against ${f1(ta*24/1000)} MU/day projected. ${ha} of ${D.length} days averaged above the projection.`,
+   `Band furthest above projection: ${mx.n} (highest ${f1(mx.hx)} MW on ${dl(mx.hd)}, ${(mx.dh>=0?'+':'')+f1(mx.dh)} MW vs projected peak). Band furthest below: ${mn2.n} (${(mn2.dh>=0?'+':'')+f1(mn2.dh)} MW).`,
+   `Across the 48 half-hour blocks the highest actual demand exceeded the projected Peak profile in ${ex} block(s). This is a strict test: it compares the most extreme day at each block with a single projected profile, so exceedances are expected more often at some times of day.`]}
+ const proj=LG?card('KSEBL projection (from the LGB file)',`<div class=pr>${mname(S.mo)}: ${lgbText(S.mo)}</div>`):card('KSEBL projection',S.mo!=='all'?`<div class=pr>For ${mname(S.mo)} (MW): ${ME.up?`highest <input id=pk type=number class=sel value=\"${pr?.h??''}\"> average <input id=pa type=number class=sel value=\"${pr?.a??''}\">`:`highest ${pr?.h??'–'} · average ${pr?.a??'–'}`}</div><p class=sub style="margin-top:8px">Import the KSEBL LGB workbook to load the full projected profile automatically.</p>`:'<p class=sub>Select a single month (top bar) to enter the KSEBL projected highest and average demand.</p>');
  return{h:kp(kpi('Peak demand',f1(B.peak)+' MW',dl(B.d)+(B.pk!=null?' · '+L48[B.pk]:'')),kpi('Lowest demand',Lo?f1(Lo.min)+' MW':'–',Lo?dl(Lo.d):'needs Energy Log'),kpi('Mean daily average',f1(mean(D,'avg'))+' MW',pr?'KSEBL proj. '+f1(pr.a):''),kpi('Mean daily highest',f1(mean(D,'peak'))+' MW',pr?'KSEBL proj. '+f1(pr.h):''),...(pr?[kpi('Days above proj. highest',hi+' / '+D.length),kpi('Days above proj. average',ha+' / '+D.length)]:[]))
- +card('KSEBL projection',S.mo!=='all'?`<div class=pr>For ${mname(S.mo)} (MW): ${ME.up?`highest <input id=pk type=number class=sel value="${pr?.h??''}"> average <input id=pa type=number class=sel value="${pr?.a??''}">`:`highest ${pr?.h??'–'} · average ${pr?.a??'–'}`}</div>`:'<p class=sub>Select a single month (top bar) to enter the KSEBL projected highest and average demand.</p>')
- +card('Daily highest, average &amp; lowest demand (MW)',cv('c1'))+(E.length?card('Time-of-day profile (48 × 30-min blocks)',cv('c2'),dsel(E.map(r=>r.d))):card('Time-of-day profile','<p class=sub>Needs the Energy Log for at least one day in this month.</p>')),
- d:()=>{mk('c1','line',D.map(r=>dl(r.d)),[{label:'Highest',data:D.map(r=>r.peak),borderWidth:3},{label:'Average',data:D.map(r=>r.avg),borderColor:P[1]},{label:'Lowest',data:D.map(r=>r.min),borderColor:P[2]},...(pr?[{label:'Proj. highest',data:D.map(()=>pr.h),borderDash:[6,4],borderColor:P[3],pointRadius:0},{label:'Proj. average',data:D.map(()=>pr.a),borderDash:[6,4],borderColor:P[4],pointRadius:0}]:[])],{y:'MW'});
-  if(!E.length)return;const M=E.map(r=>DB.e[r.d].kt.map(v=>v*2));mk('c2','line',L48,[{label:dl(S.day),data:DB.e[S.day].kt.map(v=>v*2),borderWidth:3},{label:'Selection average',data:L48.map((_,i)=>avg(M.map(a=>a[i]))),borderDash:[4,3],borderColor:P[1]},{label:'Selection highest',data:L48.map((_,i)=>Math.max(...M.map(a=>a[i]))),borderDash:[2,3],borderColor:P[3]}],{y:'MW',pts:0})}}};
+ +proj+card('Daily highest, average &amp; lowest demand (MW)',cv('c1'))
+ +(E.length?(PP?card('Highest demand vs KSEBL projected Peak, by half-hour (MW)',cv('c2'),dsel(E.map(r=>r.d)))+card('Average demand vs KSEBL projected Avg, by half-hour (MW)',cv('c3'))+card('Actual vs projection by KSEBL time band',bands)+card('Key inferences',`<ul>${inf.map(x=>`<li>${x}</li>`).join('')}</ul>`):card('Time-of-day profile (48 × 30-min blocks)',cv('c2'),dsel(E.map(r=>r.d)))):card('Time-of-day profile','<p class=sub>Needs the Energy Log for at least one day in this month.</p>')),
+ d:()=>{mk('c1','line',D.map(r=>dl(r.d)),[{label:'Highest',data:D.map(r=>r.peak),borderWidth:3},{label:'Average',data:D.map(r=>r.avg),borderColor:P[1]},{label:'Lowest',data:D.map(r=>r.min),borderColor:P[2]},...(D.some(PF)?[{label:'Proj. highest',data:D.map(r=>PF(r)?.h),borderDash:[6,4],borderColor:P[3],pointRadius:0},{label:'Proj. average',data:D.map(r=>PF(r)?.a),borderDash:[6,4],borderColor:P[4],pointRadius:0}]:[])],{y:'MW'});
+  if(!E.length)return;const day=DB.e[S.day].kt.map(v=>v*2);
+  if(PP){mk('c2','line',L48,[{label:'Actual highest (max of all days)',data:HX,borderWidth:3},{label:'KSEBL projected Peak',data:PP.pk48,borderDash:[6,4],borderColor:P[3],borderWidth:2.5},{label:dl(S.day)+' (selected day)',data:day,borderColor:P[1],borderWidth:1.5}],{y:'MW',pts:0});
+   mk('c3','line',L48,[{label:'Actual average (mean of all days)',data:AV,borderWidth:3},{label:'KSEBL projected Avg',data:PP.av48,borderDash:[6,4],borderColor:P[4],borderWidth:2.5},{label:dl(S.day)+' (selected day)',data:day,borderColor:P[1],borderWidth:1.5}],{y:'MW',pts:0})}
+  else mk('c2','line',L48,[{label:dl(S.day),data:day,borderWidth:3},{label:'Selection average',data:AV,borderDash:[4,3],borderColor:P[1]},{label:'Selection highest',data:HX,borderDash:[2,3],borderColor:P[3]}],{y:'MW',pts:0})}}};
 
 V.hyd=R0=>{const w=S.w,[a,b]=WB[w],R=R0.map(r=>{const h=hydW(r);return h==null&&r.pur==null&&r.sur==null?null:{d:r.d,mwh:h==null?null:h*1000,h,p:r.pur,s:r.sur,x:''}}).filter(Boolean),RH=R.filter(r=>r.h!=null);
  if(!R.length)return EMPTY('No hydro, purchase or surrender data in this selection yet. Import the daily Energy Logs (hydro) and the Purchase & Surrender workbook or SLDC PDFs.');
@@ -257,7 +375,7 @@ V.iex=R=>{const X=R.filter(r=>r.dam!=null||r.rtm!=null);if(!X.length)return EMPT
  d:()=>{mk('c1','line',X.map(r=>dl(r.d)),[{label:'DAM',data:X.map(r=>r.dam)},{label:'RTM',data:X.map(r=>r.rtm),borderColor:P[1]}],{y:'₹/kWh'});const p=k=>(DB.iex[S.day]?.[k]?.p||[]).map(v=>v==null?null:v/1000);mk('c2','line',L96,[{label:'DAM',data:p('D')},{label:'RTM',data:p('R'),borderColor:P[1]}],{y:'₹/kWh',pts:0})}}};
 
 V.data=R=>{const A=range(),ck=b=>b?'<td class=ok>✓':'<td class=no>–',n=f=>A.filter(f).length;
- return{h:kp(kpi('Energy Log',n(d=>DB.e[d]),'days'),kpi('Statistics',n(d=>DB.st[d]),'days'),kpi('SLDC PDF',n(d=>DB.sl[d]),'days'),kpi('Purchase / Surrender',n(d=>DB.ps[d]),'days'),kpi('IEX DAM',n(d=>DB.iex[d]?.D),'days'),kpi('IEX RTM',n(d=>DB.iex[d]?.R),'days'))
+ return{h:kp(kpi('Energy Log',n(d=>DB.e[d]),'days'),kpi('Statistics',n(d=>DB.st[d]),'days'),kpi('SLDC PDF',n(d=>DB.sl[d]),'days'),kpi('Purchase / Surrender',n(d=>DB.ps[d]),'days'),kpi('IEX DAM',n(d=>DB.iex[d]?.D),'days'),kpi('IEX RTM',n(d=>DB.iex[d]?.R),'days'),kpi('KSEBL LGB projection',Object.keys(DB.lgb).length,'months'))
  +card('Backup &amp; maintenance',`<div class=ba style="margin:0"><button id=bk class="btn sec">Backup (.json)</button>${ME.up?'<button id=rs class="btn sec">Restore backup to server</button>':''}<button id=xl class="btn sec">Export data to Excel</button><button id=cl class="btn sec">Re-sync from server</button><input id=rf type=file accept=.json hidden></div>`)
  +card('Coverage – a dash means that file has not been imported for that date',`<div class=sc style="max-height:480px"><table><tr><th>Date<th>Energy Log<th>Statistics<th>SLDC PDF<th>Purch/Surr<th>DAM<th>RTM${A.map(d=>`<tr${d===S.focus?' class=fc':''}><td>${d}${ck(DB.e[d])}${ck(DB.st[d])}${ck(DB.sl[d])}${ck(DB.ps[d])}${ck(DB.iex[d]?.D)}${ck(DB.iex[d]?.R)}`).join('')}</table></div>`),d(){}}};
 
@@ -267,8 +385,8 @@ const mn=a=>a.length?Math.min(...a):null,mxx=a=>a.length?Math.max(...a):null,WK=
 const fv=(v,d)=>d<0?(v??'–'):v==null||isNaN(v)?'–':v.toLocaleString('en-IN',{minimumFractionDigits:d,maximumFractionDigits:d});
 const hydW=r=>{const e=DB.e[r.d]?.hy,[a,b]=WB[S.w];return e?sum(e.slice(a,b))/1000:null};   // hydro comes from the Energy Log only
 function mstat(m){const ds=alld().filter(d=>d.startsWith(m)),R=ds.map(daily),D=R.filter(r=>r.peak!=null&&DB.e[r.d]),pr=DB.proj[m]||{},B=best(R,'peak'),Lo=best(D,'min',0),o={m,n:ds.length};
- Object.assign(o,{nd:D.length,peak:B?.peak,pkd:B?dl(B.d)+(B.pk!=null?' · '+L48[B.pk]:''):'–',davg:mean(D,'avg'),min:Lo?.min,cons:tot(R,'cons'),consd:mean(R,'cons'),hyd:tot(R,'hyd'),pur:tot(R,'pur'),sur:tot(R,'sur'),dam:mean(R,'dam'),rtm:mean(R,'rtm'),ph:pr.h,pa:pr.a});
- o.lf=o.davg&&o.peak?o.davg/o.peak*100:null;o.above=pr.h?D.filter(r=>r.peak>pr.h).length:null;
+ Object.assign(o,{nd:D.length,peak:B?.peak,pkd:B?dl(B.d)+(B.pk!=null?' · '+L48[B.pk]:''):'–',davg:mean(D,'avg'),min:Lo?.min,cons:tot(R,'cons'),consd:mean(R,'cons'),hyd:tot(R,'hyd'),pur:tot(R,'pur'),sur:tot(R,'sur'),dam:mean(R,'dam'),rtm:mean(R,'rtm'),ph:pr.h,pa:pr.a,pa:pr.a});
+ o.lf=o.davg&&o.peak?o.davg/o.peak*100:null;o.above=pr.h?D.filter(r=>r.peak>pr.h).length:null;o.abovea=pr.a?D.filter(r=>r.avg>pr.a).length:null;
  const vw=k=>{const x=ds.map(d=>iexDay(d,k)?.vw).filter(v=>v!=null);return x.length?avg(x):null};
  Object.assign(o,{nx:ds.filter(d=>DB.iex[d]).length,dvw:vw('D'),rvw:vw('R'),gap:o.dam!=null&&o.rtm!=null?o.rtm-o.dam:null,dmax:mxx(col(R,'dam')),dmin:mn(col(R,'dam'))});
  const C=R.filter(r=>hydW(r)!=null),H=C.map(hydW),CE=R.filter(r=>DB.e[r.d]?.hy);
@@ -277,7 +395,7 @@ function mstat(m){const ds=alld().filter(d=>d.startsWith(m)),R=ds.map(daily),D=R
  Object.assign(o,{cE:ds.filter(d=>DB.e[d]).length,cS:ds.filter(d=>DB.st[d]).length,cP:ds.filter(d=>DB.sl[d]).length,cPS:ds.filter(d=>DB.ps[d]).length,cD:ds.filter(d=>DB.iex[d]?.D).length,cR:ds.filter(d=>DB.iex[d]?.R).length});return o}
 const SPEC={
  sum:[['Days','n',0],['Peak (MW)','peak',1],['Energy (MU)','cons',1],['Avg/day (MU)','consd',1],['Hydro (MU)','hyd',1],['Purchase (MU)','pur',1],['Surrender (MU)','sur',1],['DAM (₹/kWh)','dam',2],['RTM (₹/kWh)','rtm',2]],
- dem:[['Days','nd',0],['Peak (MW)','peak',1],['Peak on','pkd',-1],['Mean daily avg (MW)','davg',1],['Lowest (MW)','min',1],['Load factor (%)','lf',1],['Energy (MU)','cons',1],['Proj. highest (MW)','ph',1],['Days above proj.','above',0]],
+ dem:[['Days','nd',0],['Peak (MW)','peak',1],['Peak on','pkd',-1],['Mean daily avg (MW)','davg',1],['Lowest (MW)','min',1],['Load factor (%)','lf',1],['Energy (MU)','cons',1],['Proj. highest (MW)','ph',1],['Days above proj. highest','above',0],['Proj. average (MW)','pa',1],['Days above proj. average','abovea',0]],
  hyd:[['Days with hydro','hn',0],['Hydro (MU)','hw',2],['Avg/day (MU)','hwd',2],['Min day (MU)','hmin',2],['Max day (MU)','hmax',2],['Std dev (MU)','hsd',2],['Purchase (MU)','hp',2],['Surrender (MU)','hs',2],['Net P−S (MU)','hnet',2],['00–08 (MU)','w00-08',2],['08–18 (MU)','w08-18',2],['18–22 (MU)','w18-22',2],['22–24 (MU)','w22-24',2]],
  iex:[['Days','nx',0],['DAM avg','dam',2],['RTM avg','rtm',2],['RTM − DAM','gap',2],['DAM vol-wtd','dvw',2],['RTM vol-wtd','rvw',2],['Highest daily DAM','dmax',2],['Lowest daily DAM','dmin',2]],
  data:[['Days with any data','n',0],['Energy Log','cE',0],['Statistics','cS',0],['SLDC PDF','cP',0],['Purch/Surr','cPS',0],['DAM','cD',0],['RTM','cR',0]]};
@@ -301,9 +419,12 @@ VA.sum=()=>{const ms=MS(),T=mstat(''),O=ms.map(mstat),lb=ms.map(msh);return{h:kp
 VC.sum=()=>{const ms=cm();return{h:card('Month comparison',ct('sum',ms))+ch('c1','Energy consumed by day of month (MU)')+ch('c2','Hydro by day of month (MU)')+ch('c3','Totals by month (MU)'),d:()=>{ovl('c1',ms,d=>daily(d).cons,'MU');ovl('c2',ms,d=>daily(d).hyd,'MU');grp('c3',ms,HPS)}}};
 
 VA.dem=()=>{const ms=MS(),T=mstat(''),O=ms.map(mstat),lb=ms.map(msh);return{h:kp(kpi('Peak demand',f1(T.peak)+' MW',T.pkd),kpi('Lowest demand',f1(T.min)+' MW'),kpi('Mean daily average',f1(T.davg)+' MW'),kpi('Load factor',f1(T.lf)+' %','mean avg ÷ peak'),kpi('Energy consumed',f1(T.cons)+' MU'))+card('Month-wise demand summary',mt('dem',ms))+ch('c1','Highest, average &amp; lowest demand by month (MW)')+ch('c2','Load factor by month (%)'),
- d:()=>{mk('c1','line',lb,[{label:'Highest',data:O.map(o=>o.peak),pointRadius:4,borderWidth:3},{label:'Average',data:O.map(o=>o.davg),borderColor:P[1],pointRadius:4},{label:'Lowest',data:O.map(o=>o.min),borderColor:P[2],pointRadius:4},...(O.some(o=>o.ph)?[{label:'Proj. highest',data:O.map(o=>o.ph),borderDash:[6,4],borderColor:P[3]}]:[])],{y:'MW'});mk('c2','bar',lb,[{label:'Load factor (%)',data:O.map(o=>o.lf)}])}}};
-VC.dem=()=>{const ms=cm();return{h:card('Month comparison',ct('dem',ms))+ch('c1','Daily highest demand by day of month (MW)')+ch('c2','Average time-of-day profile by month (MW)'),
- d:()=>{ovl('c1',ms,d=>daily(d).peak,'MW');mk('c2','line',L48,ms.map((m,i)=>({label:msh(m),data:profE(m),borderColor:P[i%6]})),{y:'MW',pts:0})}}};
+ d:()=>{mk('c1','line',lb,[{label:'Highest',data:O.map(o=>o.peak),pointRadius:4,borderWidth:3},{label:'Average',data:O.map(o=>o.davg),borderColor:P[1],pointRadius:4},{label:'Lowest',data:O.map(o=>o.min),borderColor:P[2],pointRadius:4},...(O.some(o=>o.ph)?[{label:'Proj. highest',data:O.map(o=>o.ph),borderDash:[6,4],borderColor:P[3]}]:[]),...(O.some(o=>o.pa)?[{label:'Proj. average',data:O.map(o=>o.pa),borderDash:[6,4],borderColor:P[4]}]:[])],{y:'MW'});mk('c2','bar',lb,[{label:'Load factor (%)',data:O.map(o=>o.lf)}])}}};
+VC.dem=()=>{const ms=cm(),dys=m=>alld().filter(d=>d.startsWith(m)&&DB.e[d]),pp=m=>{const d=dys(m);return d.length&&lgbParts(m).length?projProfile(d):null};
+ return{h:card('Month comparison',ct('dem',ms))+ch('c1','Daily highest demand by day of month (MW)')+ch('c2','Average demand by half-hour, by month (MW) – dashed = KSEBL projected Avg')+ch('c3','Highest demand by half-hour, by month (MW) – dashed = KSEBL projected Peak'),
+ d:()=>{ovl('c1',ms,d=>daily(d).peak,'MW');
+  mk('c2','line',L48,[...ms.map((m,i)=>({label:msh(m),data:profE(m),borderColor:P[i%6]})),...ms.map((m,i)=>pp(m)?{label:msh(m)+' proj.',data:pp(m).av48,borderColor:P[i%6],borderDash:[5,4],borderWidth:1.5}:null).filter(Boolean)],{y:'MW',pts:0});
+  mk('c3','line',L48,[...ms.map((m,i)=>{const d=dys(m);return{label:msh(m),data:L48.map((_,j)=>d.length?Math.max(...d.map(x=>DB.e[x].kt[j]*2)):null),borderColor:P[i%6]}}),...ms.map((m,i)=>pp(m)?{label:msh(m)+' proj.',data:pp(m).pk48,borderColor:P[i%6],borderDash:[5,4],borderWidth:1.5}:null).filter(Boolean)],{y:'MW',pts:0})}}};
 
 VA.hyd=()=>{const ms=MS(),T=mstat('');return{h:kp(kpi('Total hydro',f2(T.hw)+' MU',WN[S.w]),kpi('Average hydro per day',f2(T.hwd)+' MU',T.hn+' days with hydro'),kpi('Total purchase',f2(T.hp)+' MU'),kpi('Total surrender',f2(T.hs)+' MU','net '+f2(T.hnet)+' MU'))+card('Month-wise hydro, purchase &amp; surrender · '+WN[S.w],mt('hyd',ms))+ch('c1','Hydro by time window and month (MU)')+ch('c2','Hydro, purchase &amp; surrender by month (MU)'),d:()=>{winC('c1',ms);grp('c2',ms,HPS2)}}};
 VC.hyd=()=>{const ms=cm(),[a,b]=WB[S.w];return{h:card('Month comparison · '+WN[S.w],ct('hyd',ms))+ch('c1','Hydro by day of month (MU)')+ch('c2','Purchase by day of month (MU)')+ch('c3','Hydro by time window and month (MU)'),
@@ -314,7 +435,7 @@ VA.iex=()=>{const ms=MS(),T=mstat(''),O=ms.map(mstat);return{h:kp(kpi('DAM avera
 VC.iex=()=>{const ms=cm();return{h:card('Month comparison',ct('iex',ms))+ch('c1','DAM daily average by day of month (₹/kWh)')+ch('c2','RTM daily average by day of month (₹/kWh)')+ch('c3','DAM average 15-min profile by month (₹/kWh)')+ch('c4','RTM average 15-min profile by month (₹/kWh)'),
  d:()=>{ovl('c1',ms,d=>iexDay(d,'D')?.avg,'₹/kWh');ovl('c2',ms,d=>iexDay(d,'R')?.avg,'₹/kWh');['D','R'].forEach((k,j)=>mk('c'+(3+j),'line',L96,ms.map((m,i)=>({label:msh(m),data:profI(m,k),borderColor:P[i%6]})),{y:'₹/kWh',pts:0}))}}};
 
-VA.data=()=>{const ms=MS(),T=mstat('');return{h:kp(kpi('Energy Log',T.cE,'days'),kpi('Statistics',T.cS,'days'),kpi('SLDC PDF',T.cP,'days'),kpi('Purchase / Surrender',T.cPS,'days'),kpi('IEX DAM',T.cD,'days'),kpi('IEX RTM',T.cR,'days'))+card('Month-wise data coverage (days imported)',mt('data',ms)),d(){}}};
+VA.data=()=>{const ms=MS(),T=mstat('');return{h:kp(kpi('Energy Log',T.cE,'days'),kpi('Statistics',T.cS,'days'),kpi('SLDC PDF',T.cP,'days'),kpi('Purchase / Surrender',T.cPS,'days'),kpi('IEX DAM',T.cD,'days'),kpi('IEX RTM',T.cR,'days'),kpi('KSEBL LGB projection',Object.keys(DB.lgb).length,'months'))+card('Month-wise data coverage (days imported)',mt('data',ms)),d(){}}};
 VC.data=()=>({h:card('Month comparison · data coverage (days imported)',ct('data',cm())),d(){}});
 
 function render(){const all=alld(),ms=MS();if(S.mode==='m'&&!ms.includes(S.mo))S.mo=ms.at(-1)||'';const cmpM=S.mode==='c'&&ms.length?cm():[];
@@ -339,11 +460,12 @@ function apply(r){touch(r);return apply0(r)}
 function apply0(r){
  if(r.t==='iex'){let n=0,k=0;for(const d in r.days){const o=DB.iex[d]=DB.iex[d]||{},old=o[r.key];if(old&&cnt(old.p)>cnt(r.days[d].p)){k++;continue}o[r.key]=r.days[d];PEND.iex.add(d+'|'+r.key);n++}return `${r.key==='R'?'RTM':'DAM'}: ${n} day(s)${k?`, ${k} kept (existing more complete)`:''}`}
  if(r.t==='ps'){Object.entries(r.days).forEach(([d,x])=>{DB.ps[d]={...DB.ps[d],...x};PEND.ps.add(d)});return `purchase/surrender: ${Object.keys(r.days).length} day(s)`}
+ if(r.t==='lgb'){const ks=Object.keys(r.months).sort();ks.forEach(m=>{DB.lgb[m]=r.months[m];PEND.lgb.add(m);const P=r.months[m];DB.proj[m]={h:mxx(P.map(p=>mxx(p.pk))),a:avg(P.map(p=>avg(p.av)))};PEND.proj.add(m)});return `KSEBL LGB projection: ${ks.length} months (${msh(ks[0])} – ${msh(ks.at(-1))}), 96-block Peak & Avg profiles`}
  if(r.t==='e'){DB.e[r.date]=r.v;PEND.e.add(r.date);return `Energy Log ${r.date}: peak ${f1(Math.max(...r.v.kt)*2)} MW, ${f1(sum(r.v.kt)/1000)} MU`}
  if(r.t==='st'){DB.st[r.date]={v:r.v};PEND.st.add(r.date);return `Statistics ${r.date}: ${Object.keys(r.v.hs).length} hydro stations`}
  if(r.t==='sl'){DB.sl[r.date]=r.v;PEND.sl.add(r.date);PEND.ps.add(r.date);DB.ps[r.date]={...DB.ps[r.date],pur:r.v.pur,sur:r.v.sur,sale:r.v.sale};return `SLDC PDF ${r.date}: purchase ${r.v.pur}, surrender ${r.v.sur} MU`}}
 async function pdfText(f){await pdfWorker();const pdf=await pdfjsLib.getDocument({data:new Uint8Array(await f.arrayBuffer())}).promise;let t='';for(let i=1;i<=pdf.numPages;i++)t+=(await(await pdf.getPage(i)).getTextContent()).items.map(x=>x.str).join(' ')+' ';return t}
-const UPD={e:'Summary · Demand · Hydro',st:'Hydro (station-wise chart)',sl:'Summary · Demand (peak) · Purchase/Surrender',ps:'Summary · Hydro tab (purchase/surrender)',iex:'Summary · IEX prices'},fkey=f=>f.name+'|'+f.size+'|'+f.lastModified;
+const UPD={lgb:'Demand (projected highest/average, 48-block load curve, time bands)',e:'Summary · Demand · Hydro',st:'Hydro (station-wise chart)',sl:'Summary · Demand (peak) · Purchase/Surrender',ps:'Summary · Hydro tab (purchase/surrender)',iex:'Summary · IEX prices'},fkey=f=>f.name+'|'+f.size+'|'+f.lastModified;
 async function ingest(files){if(!ME.up){alert('Only uploaders can import files. Ask an uploader to add the data – you will see it here automatically.');return}
  $('#ov').hidden=false;$('#il').textContent='';const L=[];touched=[];
  for(const f of files){if(/\.zip$/i.test(f.name)){try{const z=await JSZip.loadAsync(await f.arrayBuffer()),es=Object.values(z.files).filter(e=>!e.dir&&/\.(xlsx?|xlsm|pdf)$/i.test(e.name)&&!/__MACOSX|\/\._|~\$/.test(e.name));
@@ -361,7 +483,7 @@ async function ingest(files){if(!ME.up){alert('Only uploaders can import files. 
 const dl2=(blob,name)=>{const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download=name;a.style.display='none';document.body.appendChild(a);a.click();setTimeout(()=>{a.remove();URL.revokeObjectURL(a.href)},2000)};
 async function restore(txt){if(!ME.up)throw new Error('only uploaders can restore a backup');const o=JSON.parse(txt);if(!o.e||!o.iex)throw new Error('not a MIS backup file');merge(DB,o);
  Object.keys(o.e).forEach(d=>PEND.e.add(d));Object.keys(o.st||{}).forEach(d=>PEND.st.add(d));Object.keys(o.sl||{}).forEach(d=>PEND.sl.add(d));Object.keys(o.ps||{}).forEach(d=>PEND.ps.add(d));
- Object.keys(o.iex).forEach(d=>Object.keys(o.iex[d]).forEach(m=>PEND.iex.add(d+'|'+m)));Object.keys(o.proj||{}).forEach(m=>PEND.proj.add(m));Object.keys(o.files||{}).forEach(k=>PEND.files.add(k));
+ Object.keys(o.iex).forEach(d=>Object.keys(o.iex[d]).forEach(m=>PEND.iex.add(d+'|'+m)));Object.keys(o.proj||{}).forEach(m=>PEND.proj.add(m));Object.keys(o.lgb||{}).forEach(m=>PEND.lgb.add(m));Object.keys(o.files||{}).forEach(k=>PEND.files.add(k));
  lg('Uploading backup to the shared database…');await flush();await cacheSave();render();lg('✓ backup restored and saved online','ok')}
 function exportXL(){const wb=XLSX.utils.book_new(),add=(n,rows)=>XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(rows),n);
  add('Daily_Summary',alld().map(daily).map(r=>({Date:r.d,'Peak MW':r.peak,'Avg MW':r.avg,'Min MW':r.min,'Consumption MU':r.cons,'Hydro MU':r.hyd,'Purchase MU':r.pur,'Surrender MU':r.sur,'DAM avg Rs/kWh':r.dam,'RTM avg Rs/kWh':r.rtm})));
@@ -375,27 +497,27 @@ function buildPDF(){
  const cl=s=>String(s??'').replace(/[\u2013\u2014\u2212]/g,'-').replace(/\u2192/g,'->').replace(/\u2026/g,'...').replace(/₹/g,'Rs ').replace(/✓/g,'Yes').replace(/[^\x00-\xff]/g,'?');
  const tw=(s,z,b)=>{mc.font=(b?'bold ':'')+z+'px Helvetica,Arial,sans-serif';return mc.measureText(cl(s)).width},rgb=h=>[1,3,5].map(i=>(parseInt(h.substr(i,2),16)/255).toFixed(3)).join(' ');
  const pages=[],imgs=[],head='Kerala Power MIS - '+$('#h1').textContent;let cur,y;
- const T=(s,x,yb,z,o={})=>{const xx=o.al==='r'?x-tw(s,z,o.b):x;cur.push(`BT /${o.b?'F2':'F1'} ${z} Tf ${rgb(o.c||'#0f172a')} rg ${xx.toFixed(2)} ${(H-yb).toFixed(2)} Td (${cl(s).replace(/[\\()]/g,'\\$&')}) Tj ET`)};
+ const T=(s,x,yb,z,o={})=>{const xx=o.al==='r'?x-tw(s,z,o.b):x;cur.push(`BT /${o.b?'F2':'F1'} ${z} Tf ${rgb(o.c||'#233446')} rg ${xx.toFixed(2)} ${(H-yb).toFixed(2)} Td (${cl(s).replace(/[\\()]/g,'\\$&')}) Tj ET`)};
  const RC=(x,yt,w,h,f,s)=>cur.push((f?rgb(f)+' rg ':'')+(s?rgb(s)+' RG 0.8 w ':'')+`${x.toFixed(2)} ${(H-yt-h).toFixed(2)} ${w.toFixed(2)} ${h.toFixed(2)} re `+(f&&s?'B':f?'f':'S')),LN=(x1,yt,x2,c)=>cur.push(`${rgb(c)} RG 0.5 w ${x1} ${(H-yt).toFixed(2)} m ${x2} ${(H-yt).toFixed(2)} l S`);
  const wr=(s,w,z,b)=>{const o=[];let l='';for(const wd of cl(s).split(' ')){const t=l?l+' '+wd:wd;if(tw(t,z,b)>w&&l){o.push(l);l=wd}else l=t}if(l)o.push(l);return o};
- const np=()=>{cur=[];pages.push(cur);T(head,M,24,8,{c:'#64748b'});y=40},need=h=>{if(y+h>H-40)np()};
- const H2=t=>{need(60);T(t,M,y+11,11,{b:1,c:'#1e3a8a'});y+=16;LN(M,y,M+CW,'#bfdbfe');y+=8};
+ const np=()=>{cur=[];pages.push(cur);T(head,M,24,8,{c:'#8592a3'});y=40},need=h=>{if(y+h>H-40)np()};
+ const H2=t=>{need(60);T(t,M,y+11,11,{b:1,c:'#233446'});y+=16;LN(M,y,M+CW,'#d9dee3');y+=8};
  const grid=(els,hgt,fn)=>{const k=4,w=(CW-3*8)/k;els.forEach((e,i)=>{if(i%k===0)need(hgt+8);const x=M+(i%k)*(w+8);fn(e,x,y,w);if(i%k===k-1||i===els.length-1)y+=hgt+8})};
- const kpis=els=>grid(els,58,(e,x,yy,w)=>{RC(x,yy,w,58,'#ffffff','#2563eb');wr(e.children[0].textContent,w-12,7.5).slice(0,2).forEach((l,j)=>T(l,x+6,yy+11+j*9,7.5,{c:'#64748b'}));T(e.children[1].textContent,x+6,yy+38,e.children[1].textContent.length>13?10.5:13,{b:1,c:'#1d4ed8'});T(e.children[2].textContent,x+6,yy+51,7,{c:'#64748b'})});
- const stats=els=>grid(els,36,(e,x,yy,w)=>{RC(x,yy,w,34,'#eff6ff','#bfdbfe');T(e.children[0].textContent,x+6,yy+16,11,{b:1});T(e.children[1].textContent,x+6,yy+28,7.5,{c:'#64748b'})});
+ const kpis=els=>grid(els,58,(e,x,yy,w)=>{RC(x,yy,w,58,'#ffffff','#696cff');wr(e.children[0].textContent,w-12,7.5).slice(0,2).forEach((l,j)=>T(l,x+6,yy+11+j*9,7.5,{c:'#8592a3'}));T(e.children[1].textContent,x+6,yy+38,e.children[1].textContent.length>13?10.5:13,{b:1,c:'#696cff'});T(e.children[2].textContent,x+6,yy+51,7,{c:'#8592a3'})});
+ const stats=els=>grid(els,36,(e,x,yy,w)=>{RC(x,yy,w,34,'#f5f5f9','#d9dee3');T(e.children[0].textContent,x+6,yy+16,11,{b:1});T(e.children[1].textContent,x+6,yy+28,7.5,{c:'#8592a3'})});
  const image=c=>{const t=document.createElement('canvas');t.width=c.width;t.height=c.height;const g=t.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,t.width,t.height);g.drawImage(c,0,0);const bin=atob(t.toDataURL('image/jpeg',.92).split(',')[1]),by=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)by[i]=bin.charCodeAt(i);
   let dw=CW,dh=dw*t.height/t.width;if(dh>230){dh=230;dw=dh*t.width/t.height}need(dh+10);imgs.push({w:t.width,h:t.height,by});cur.push(`q ${dw.toFixed(2)} 0 0 ${dh.toFixed(2)} ${M} ${(H-y-dh).toFixed(2)} cm /Im${imgs.length} Do Q`);y+=dh+14};
  const table=tb=>{const rows=[...tb.rows].map(r=>({c:r.className,t:[...r.cells].map(c=>c.textContent.trim())})),n=rows[0].t.length,fw=n>5?Math.min(90,CW/n*1.3):CW/n,cw=rows[0].t.map((_,i)=>i?(CW-fw)/(n-1):fw),
    al=rows[0].t.map((_,i)=>i===0||(rows[1]&&isNaN(parseFloat(rows[1].t[i].replace(/,/g,''))))?'l':'r'),cx=i=>{const s=cw.slice(0,i).reduce((a,b)=>a+b,0);return al[i]==='l'?M+s+5:M+s+cw[i]-5};
-  const hd=()=>{need(40);rows[0].t.forEach((h,i)=>T(h.toUpperCase(),cx(i),y+10,6.5,{b:1,c:'#1d4ed8',al:al[i]}));y+=14;LN(M,y,M+CW,'#2563eb');y+=2};hd();
-  rows.slice(1).forEach(r=>{if(y+16>H-40){np();hd()}if(/\blo\b/.test(r.c))RC(M,y,CW,16,'#fee2e2');else if(/\bhi\b/.test(r.c))RC(M,y,CW,16,'#dcfce7');r.t.forEach((v,i)=>T(v,cx(i),y+11,8,{al:al[i]}));LN(M,y+16,M+CW,'#bfdbfe');y+=16});y+=10};
+  const hd=()=>{need(40);rows[0].t.forEach((h,i)=>T(h.toUpperCase(),cx(i),y+10,6.5,{b:1,c:'#696cff',al:al[i]}));y+=14;LN(M,y,M+CW,'#696cff');y+=2};hd();
+  rows.slice(1).forEach(r=>{if(y+16>H-40){np();hd()}if(/\blo\b/.test(r.c))RC(M,y,CW,16,'#ffe5e5');else if(/\bhi\b/.test(r.c))RC(M,y,CW,16,'#e8fadf');r.t.forEach((v,i)=>T(v,cx(i),y+11,8,{al:al[i]}));LN(M,y+16,M+CW,'#d9dee3');y+=16});y+=10};
  const doCard=c=>{const h=c.querySelector('h2');H2(h?h.textContent:'');[...c.children].forEach(e=>{const k=e.className;
-   if(k==='stats')stats([...e.children]);else if(k==='cv')image(e.firstChild);else if(k==='sc')table(e.firstChild);else if(k==='lg'){T(e.textContent.replace(/\s+/g,' '),M,y+9,8.5,{c:'#334155'});y+=18}
-   else if(e.tagName==='UL')e.querySelectorAll('li').forEach(li=>{const ls=wr(li.textContent,CW-14,9);need(ls.length*12+6);RC(M+2,y+3,3,3,'#2563eb');ls.forEach((l,j)=>T(l,M+12,y+9+j*12,9));y+=ls.length*12+5});
-   else if(k==='pr'||k==='sub'||k==='empty'){wr(e.textContent,CW,9).forEach(l=>{need(14);T(l,M,y+9,9,{c:'#334155'});y+=12});y+=4}})};
- np();T('Kerala Power MIS',M,y+9,8.5,{b:1,c:'#1d4ed8'});y+=18;T($('#h1').textContent,M,y+16,16,{b:1});y+=26;T($('#sub').textContent+(S.tab==='hyd'?' · '+WN[S.w]:'')+' · generated '+new Date().toLocaleDateString('en-GB'),M,y+9,9.5,{c:'#64748b'});y+=22;
+   if(k==='stats')stats([...e.children]);else if(k==='cv')image(e.firstChild);else if(k==='sc')table(e.firstChild);else if(k==='lg'){T(e.textContent.replace(/\s+/g,' '),M,y+9,8.5,{c:'#566a7f'});y+=18}
+   else if(e.tagName==='UL')e.querySelectorAll('li').forEach(li=>{const ls=wr(li.textContent,CW-14,9);need(ls.length*12+6);RC(M+2,y+3,3,3,'#696cff');ls.forEach((l,j)=>T(l,M+12,y+9+j*12,9));y+=ls.length*12+5});
+   else if(k==='pr'||k==='sub'||k==='empty'){wr(e.textContent,CW,9).forEach(l=>{need(14);T(l,M,y+9,9,{c:'#566a7f'});y+=12});y+=4}})};
+ np();T('Kerala Power MIS',M,y+9,8.5,{b:1,c:'#696cff'});y+=18;T($('#h1').textContent,M,y+16,16,{b:1});y+=26;T($('#sub').textContent+(S.tab==='hyd'?' · '+WN[S.w]:'')+' · generated '+new Date().toLocaleDateString('en-GB'),M,y+9,9.5,{c:'#8592a3'});y+=22;
  [...$('#v').children].forEach(e=>e.classList.contains('kp')?kpis([...e.children]):e.classList.contains('card')&&doCard(e));
- pages.forEach((p,i)=>{cur=p;T(`Page ${i+1} of ${pages.length}`,W-M,H-20,8,{al:'r',c:'#64748b'})});
+ pages.forEach((p,i)=>{cur=p;T(`Page ${i+1} of ${pages.length}`,W-M,H-20,8,{al:'r',c:'#8592a3'})});
  const enc=s=>{const a=new Uint8Array(s.length);for(let i=0;i<s.length;i++)a[i]=s.charCodeAt(i)&255;return a},ch_=[],off=[];let pos=0;
  const put=u=>{ch_.push(u);pos+=u.length},ob=(n,b)=>{off[n]=pos;put(enc(n+' 0 obj\n'+b+'\nendobj\n'))},sob=(n,d,by)=>{off[n]=pos;put(enc(n+' 0 obj\n<< '+d+' /Length '+by.length+' >>\nstream\n'));put(by);put(enc('\nendstream\nendobj\n'))};
  const base=5+imgs.length,kids=pages.map((_,i)=>(base+2*i+1)+' 0 R').join(' ');put(enc('%PDF-1.4\n'));
