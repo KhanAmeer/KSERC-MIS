@@ -285,7 +285,7 @@ async function flush(){if(!ME.up){Object.values(PEND).forEach(s=>s.clear());thro
 
 /* sign-in / sign-out / live refresh */
 const showLogin=()=>{$('#pw').value='';$('#lg').hidden=false;setTimeout(()=>$('#em').focus(),50)};
-function applyRole(){$('#imp').hidden=!ME.up;$('#who').textContent=ME.anon?'Public view':ME.email+' · '+(ME.up?'Admin':'Viewer');$('#so').textContent=ME.anon?'Admin sign in':'Sign out'}
+function applyRole(){$('#imp').hidden=!ME.up;document.querySelector('#tabs [data-v=data]').hidden=!ME.up;if(!ME.up&&S.tab==='data')S.tab='sum';$('#who').textContent=ME.anon?'Public view':ME.email+' · '+(ME.up?'Admin':'Viewer');$('#so').textContent=ME.anon?'Admin sign in':'Sign out'}
 async function startPublic(){ME={id:'public',email:'',up:false,anon:true};$('#lg').hidden=true;applyRole();if(!alld().length){$('#v').innerHTML='<div class=card><p class=empty>Loading data…</p></div>';if(await cacheLoad())render()}
  await sync();render();startPolling()}                       // public visitors: no sign-in, read-only
 async function start(user){ME={id:user.id,email:user.email,up:false};$('#lg').hidden=true;
@@ -530,7 +530,7 @@ function infDays(tab,R0){let R=R0;const out=[],n=R.length;if(!n)return out;
 function keyInf(){const ms=MS(),M=S.mode==='m'?[]:S.mode==='a'?ms:cm();
  if(S.mode==='m'||M.length<2)return infDays(S.tab,(S.mode==='m'?range():alld().filter(d=>!M.length||d.startsWith(M[0]))).map(daily));
  return infMonths(S.tab,M)}
-function render(){const all=alld(),ms=MS();if(S.mode==='m'&&!ms.includes(S.mo))S.mo=ms.at(-1)||'';const cmpM=S.mode==='c'&&ms.length?cm():[];
+function render(){if(S.tab==='data'&&!ME.up)S.tab='sum';const all=alld(),ms=MS();if(S.mode==='m'&&!ms.includes(S.mo))S.mo=ms.at(-1)||'';const cmpM=S.mode==='c'&&ms.length?cm():[];
  $('#mo').innerHTML=ms.map(m=>`<option value=${m}${m===S.mo?' selected':''}>${mname(m)}</option>`).join('');
  $('#chips').innerHTML=ms.map(m=>`<button class="chip${cmpM.includes(m)?' on':''}" data-m=${m}>${msh(m)}</button>`).join('');
  [['#tabs',S.tab],['#w',S.w],['#md',S.mode]].forEach(([s,v])=>document.querySelectorAll(s+' button').forEach(b=>b.classList.toggle('on',b.dataset.v===v)));
