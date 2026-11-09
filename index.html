@@ -118,7 +118,7 @@ td.ok{color:var(--success-d);text-align:center;font-weight:700}td.no{color:var(-
 <div id=mbox><div class=lbl>Month</div><select id=mo class=sel></select></div>
 <div id=cbox hidden><div class=lbl>Months to compare</div><div class=chips id=chips></div></div>
 <div id=wbox hidden><div class=lbl>Time window</div><div class=seg id=w><button data-v=00-24>Full day</button><button data-v=00-08>00–08</button><button data-v=08-18>08–18</button><button data-v=18-22>18–22</button><button data-v=22-24>22–24</button></div></div>
-<div id=lbox hidden><div class=lbl>Date range</div><div class=rng><input id=lf type=date class=sel aria-label="From date"><span>to</span><input id=lt type=date class=sel aria-label="To date"></div></div>
+<div id=lbox hidden><div class=lbl>Select date</div><input id=ld type=date class=sel aria-label="Load curve date" style="margin:0;width:170px"></div>
 <div class=ba><button id=imp class=btn type=button hidden>Import</button><button id=pdf class="btn sec" type=button>Export PDF</button><button id=so class="btn sec" type=button>Sign out</button></div></div>
 <header class=hd><h1 id=h1></h1><div class=sub id=sub></div><div class=who id=who></div></header>
 <div id=nt class=nt hidden></div><div id=v><div class=card><p class=empty>Loading…</p></div></div></div></div></div>
@@ -239,7 +239,7 @@ function pdfParse(t,fn){
 const SB_URL='https://wrctfyetnixeoaofingo.supabase.co',SB_KEY='sb_publishable_Mn8am94d8ffaPKYJgyVdsA_llHc6eiQ';   // publishable key: safe to be public, data is protected by login + Row Level Security
 const sb=supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}});
 const TABLES=['e','st','sl','ps','iex','proj','files','lgb'],DB0=()=>({e:{},st:{},sl:{},ps:{},iex:{},proj:{},files:{},lgb:{},meta:{}});
-let DB=DB0(),S={tab:'sum',mode:'m',mo:'',cmp:[],day:null,w:'00-24',k:'d',lf:'',lt:'',focus:null,msg:'',scroll:false},ME={id:null,email:'',up:false},SYNC={err:'',wm:{},busy:false,timer:null};
+let DB=DB0(),S={tab:'sum',mode:'m',mo:'',cmp:[],day:null,w:'00-24',k:'d',ld:'',focus:null,msg:'',scroll:false},ME={id:null,email:'',up:false},SYNC={err:'',wm:{},busy:false,timer:null};
 const merge=(a,b)=>{for(const k of TABLES)for(const d in b[k]||{})a[k][d]=(k==='iex'||k==='ps')?{...a[k][d],...b[k][d]}:b[k][d]};
 const num0=x=>x==null?null:+x;
 const TB={   // server table -> local structure
@@ -456,13 +456,13 @@ const lcUrl=d=>{const m=LC.meta[d];return sb.storage.from(LCB).getPublicUrl(m.pa
 async function lcDays(){const {data,error}=await sb.from('load_curve_pdfs').select('day,path,updated_at').order('day',{ascending:true});
  LC.err=error?error.message:'';LC.days=error?[]:data.map(r=>r.day);LC.meta={};(data||[]).forEach(r=>LC.meta[r.day]=r)}
 V.lc=()=>{
- if(LC.days===null){lcDays().then(()=>{if(!S.lt&&LC.days.length)S.lf=S.lt=LC.days.at(-1);render()});return{h:'<div class=card><p class=empty>Loading load curves…</p></div>',d(){}}}
+ if(LC.days===null){lcDays().then(()=>{if(!S.ld&&LC.days.length)S.ld=LC.days.at(-1);render()});return{h:'<div class=card><p class=empty>Loading load curves…</p></div>',d(){}}}
  const up=ME.up?card('Upload load curve PDF',`<label id=lcdz class=dz for=lcf>Click to choose the daily load curve PDF(s), or drop them here<input id=lcf type=file accept=".pdf" multiple hidden></label><div id=lcs class=il>${LC.log.join('')}</div>`):'';
  if(LC.err&&lcMissing(LC.err))return{h:up+card('Load curves',`<p class=sub>${ME.up?'The load_curve_pdfs table / load-curves storage bucket has not been created in Supabase yet. Run the load curve SQL, then reload this page.':'Load curves are not available yet. Please check back soon.'}</p>`),d(){}};
  if(!LC.days.length)return{h:up+card('Load curves','<p class=empty>No load curve PDFs have been uploaded yet.</p>'),d(){}};
- const inR=LC.days.filter(d=>d>=S.lf&&d<=S.lt),shown=inR.slice(0,10);
- const note=!inR.length?`<p class=empty>No load curve was uploaded for the selected dates. Uploaded dates run from ${lcDate(LC.days[0])} to ${lcDate(LC.days.at(-1))}.</p>`:inR.length>10?`<p class=pr>${inR.length} dates have a load curve in this range. Showing the first 10 – narrow the range to see the others.</p>`:'';
- return{h:up+(note?card('Selected dates',note):'')+shown.map(d=>{const u=lcUrl(d);
+ const shown=LC.days.includes(S.ld)?[S.ld]:[];
+ const note=shown.length?'':`<p class=empty>No load curve was uploaded for ${S.ld?lcDate(S.ld):'this date'}. Uploaded dates run from ${lcDate(LC.days[0])} to ${lcDate(LC.days.at(-1))}.</p>`;
+ return{h:up+(note?card('Selected date',note):'')+shown.map(d=>{const u=lcUrl(d);
    return card(lcDate(d),`<iframe class=lcpdf src="${u}#view=FitH" title="Load curve ${d}" loading=lazy></iframe><p class=sub style="margin-top:8px">If the PDF does not show on your device, use <b>Open / download</b>.</p>`,`<a class="btn sec" href="${u}" target=_blank rel=noopener>Open / download</a>`)}).join(''),
   d:()=>{const z=$('#lcdz');if(z){['dragover','dragenter'].forEach(n=>z.addEventListener(n,e=>{e.preventDefault();z.classList.add('dg')}));['dragleave','drop'].forEach(n=>z.addEventListener(n,()=>z.classList.remove('dg')))}}}};
 async function lcUpload(files){if(!ME.up){alert('Only admins can upload load curves.');return}
@@ -476,15 +476,15 @@ async function lcUpload(files){if(!ME.up){alert('Only admins can upload load cur
    LC.meta[d]={day:d,path,updated_at:now};if(LC.days&&!LC.days.includes(d)){LC.days.push(d);LC.days.sort()}got.push(d);ok++;
    lcLog(`✓ ${f.name} → ${lcDate(d)}: ${pdf.numPages} page(s), original PDF saved (${Math.round(f.size/1024)} KB)`,'ok')}
   catch(e){lcLog(`✗ ${f.name}: ${e.message}`,'er')}}
- if(ok){got.sort();S.lf=got[0];S.lt=got.at(-1);LC.err='';lcLog(`Done. Showing ${got.length>1?got.length+' dates':lcDate(got[0])}.`,'ok');S.scroll=false;render()}}
+ if(ok){got.sort();S.ld=got.at(-1);LC.err='';lcLog(`Done. Showing ${lcDate(S.ld)}.`,'ok');S.scroll=false;render()}}
 function render(){const all=alld(),ms=MS();if(S.mode==='m'&&!ms.includes(S.mo))S.mo=ms.at(-1)||'';const cmpM=S.mode==='c'&&ms.length?cm():[];
  $('#mo').innerHTML=ms.map(m=>`<option value=${m}${m===S.mo?' selected':''}>${mname(m)}</option>`).join('');
  $('#chips').innerHTML=ms.map(m=>`<button class="chip${cmpM.includes(m)?' on':''}" data-m=${m}>${msh(m)}</button>`).join('');
  [['#tabs',S.tab],['#w',S.w],['#md',S.mode]].forEach(([s,v])=>document.querySelectorAll(s+' button').forEach(b=>b.classList.toggle('on',b.dataset.v===v)));
  const lc=S.tab==='lc';$('#pdf').hidden=lc;$('#md').parentElement.hidden=lc;$('#mbox').hidden=lc||S.mode!=='m';$('#cbox').hidden=lc||S.mode!=='c';$('#wbox').hidden=S.tab!=='hyd';$('#lbox').hidden=!lc;
- if(lc){$('#lf').value=S.lf;$('#lt').value=S.lt;if(LC.days&&LC.days.length){$('#lf').min=$('#lt').min=LC.days[0];$('#lf').max=$('#lt').max=LC.days.at(-1)}}
+ if(lc){$('#ld').value=S.ld;if(LC.days&&LC.days.length){$('#ld').min=LC.days[0];$('#ld').max=LC.days.at(-1)}}
  const ds=S.mode==='m'?range():S.mode==='a'?all:cmpM.flatMap(m=>all.filter(d=>d.startsWith(m)));
- $('#h1').textContent=TT[S.tab]+' · '+(lc?(S.lt?(S.lf===S.lt?S.lf:S.lf+' to '+S.lt):'no dates yet'):S.mode==='m'?(S.mo?mname(S.mo):'no data'):S.mode==='a'?'all months':'comparison');
+ $('#h1').textContent=TT[S.tab]+' · '+(lc?(S.ld?lcDate(S.ld):'no date yet'):S.mode==='m'?(S.mo?mname(S.mo):'no data'):S.mode==='a'?'all months':'comparison');
  $('#sub').textContent=S.mode==='c'?cmpM.map(msh).join('  vs  ')+' · '+ds.length+' days':ds.length?ds.length+' days · '+dl(ds[0])+' – '+dl(ds.at(-1)):'No data yet';
  if(lc)$('#sub').textContent=LC.days&&LC.days.length?LC.days.length+' dates uploaded · '+LC.days[0]+' to '+LC.days.at(-1):'No load curves uploaded yet';
  else{const u=lastUpd();if(u)$('#sub').textContent+=' · Last updated '+fmtT(u)}
@@ -578,7 +578,7 @@ document.addEventListener('click',e=>{const t=e.target.closest('button');if(!t)r
  else if(t.id==='bk')dl2(new Blob([JSON.stringify(DB)],{type:'application/json'}),`Kerala_MIS_backup_${new Date().toISOString().slice(0,10)}.json`);else if(t.id==='rs')$('#rf').click();else if(t.id==='xl')exportXL();
  else if(t.id==='cl'){t.disabled=true;t.textContent='Syncing…';sync(true).then(()=>{render()})}});
 document.addEventListener('change',e=>{const t=e.target;
- if(t.id==='lf'||t.id==='lt'){S.lf=$('#lf').value||S.lf;S.lt=$('#lt').value||S.lt;if(t.id==='lf'&&S.lt<S.lf)S.lt=S.lf;if(t.id==='lt'&&S.lt<S.lf)S.lf=S.lt;render()}else if(t.id==='lcf'){lcUpload([...t.files]);t.value=''}else if(t.id==='mo'){S.mo=t.value;S.msg='';render()}else if(t.id==='dsel'){S.day=t.value;render()}else if(t.id==='fi'){ingest([...t.files]);t.value=''}
+ if(t.id==='ld'){S.ld=t.value||S.ld;render()}else if(t.id==='lcf'){lcUpload([...t.files]);t.value=''}else if(t.id==='mo'){S.mo=t.value;S.msg='';render()}else if(t.id==='dsel'){S.day=t.value;render()}else if(t.id==='fi'){ingest([...t.files]);t.value=''}
  else if(t.id==='rf'){const f=t.files[0];f&&f.text().then(restore).catch(x=>alert(x.message));t.value=''}
  else if(t.id==='pk'||t.id==='pa'){DB.proj[S.mo]={h:+$('#pk').value||null,a:+$('#pa').value||null};PEND.proj.add(S.mo);flush().then(cacheSave).catch(err=>{alert('Could not save the projection: '+err.message);sync(true).then(render)});render()}});
 $('#ov').addEventListener('click',e=>{if(e.target.id==='ov')$('#ov').hidden=true});$('#lg').addEventListener('click',e=>{if(e.target.id==='lg')$('#lg').hidden=true});document.addEventListener('keydown',e=>{if(e.key==='Escape'){$('#ov').hidden=true;$('#lg').hidden=true}});
