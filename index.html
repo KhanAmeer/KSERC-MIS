@@ -477,6 +477,56 @@ async function lcUpload(files){if(!ME.up){alert('Only admins can upload load cur
    lcLog(`✓ ${f.name} → ${lcDate(d)}: ${pdf.numPages} page(s), original PDF saved (${Math.round(f.size/1024)} KB)`,'ok')}
   catch(e){lcLog(`✗ ${f.name}: ${e.message}`,'er')}}
  if(ok){got.sort();S.ld=got.at(-1);LC.err='';lcLog(`Done. Showing ${lcDate(S.ld)}.`,'ok');S.scroll=false;render()}}
+/* ---------- KEY INFERENCES: takeaways under every section except Load curves & Data (month / single day / all months / compare) ---------- */
+const sg=(x,d=1)=>x==null||isNaN(x)?'–':(x>=0?'+':'')+x.toLocaleString('en-IN',{minimumFractionDigits:d,maximumFractionDigits:d});
+const pcg=(a,b)=>a&&b!=null&&a!==0?sg((b-a)/Math.abs(a)*100,1)+'%':'–';
+const MET={
+ sum:[['Energy consumed','cons','MU',1],['Peak demand','peak','MW',1],['Hydro generation','hyd','MU',1],['Purchase','pur','MU',1],['Surrender','sur','MU',1],['IEX DAM average','dam','₹/kWh',2],['IEX RTM average','rtm','₹/kWh',2]],
+ dem:[['Peak demand','peak','MW',1],['Mean daily average demand','davg','MW',1],['Lowest demand','min','MW',1],['Load factor','lf','%',1],['Energy consumed','cons','MU',1]],
+ hyd:[['Hydro generation','hw','MU',2],['Average hydro per day','hwd','MU',2],['Purchase','hp','MU',2],['Surrender','hs','MU',2],['Net purchase minus surrender','hnet','MU',2]],
+ iex:[['DAM average','dam','₹/kWh',2],['RTM average','rtm','₹/kWh',2],['RTM minus DAM gap','gap','₹/kWh',2],['DAM volume-weighted','dvw','₹/kWh',2],['RTM volume-weighted','rvw','₹/kWh',2]]};
+function infMonths(tab,ms){const O=ms.map(mstat),out=[];
+ for(const [n,k,u,d] of MET[tab]){const v=O.map((o,i)=>({m:ms[i],x:o[k]})).filter(r=>r.x!=null&&!isNaN(r.x));if(v.length<2)continue;
+  const hi=v.reduce((a,b)=>b.x>a.x?b:a),lo=v.reduce((a,b)=>b.x<a.x?b:a),a=v[0],b=v.at(-1);
+  out.push(`${n}: highest in ${msh(hi.m)} (${fv(hi.x,d)} ${u}), lowest in ${msh(lo.m)} (${fv(lo.x,d)} ${u}); from ${msh(a.m)} to ${msh(b.m)} it moved from ${fv(a.x,d)} to ${fv(b.x,d)} ${u} (${sg(b.x-a.x,d)} ${u}, ${pcg(a.x,b.x)}).`)}
+ return out}
+function infDays(tab,R0){let R=R0;const out=[],n=R.length;if(!n)return out;
+ if(tab==='hyd')R=R.map(r=>({...r,hw:hydW(r)}));
+ const D=R.filter(r=>r.peak!=null),
+ trend=(nm,k,u,d=1)=>{const c=R.filter(r=>r[k]!=null&&!isNaN(r[k]));if(c.length<4)return;const m=Math.ceil(c.length/2),a=avg(c.slice(0,m).map(r=>r[k])),b=avg(c.slice(m).map(r=>r[k]));
+  out.push(`${nm} trend: the first half of the period averaged ${fv(a,d)} ${u} and the second half ${fv(b,d)} ${u} (${pcg(a,b)}).`)};
+ if(tab==='sum'){
+  const pk=best(R,'peak'),cx=best(R,'cons'),cn=best(R,'cons',0);
+  if(pk)out.push(`Peak demand was ${f1(pk.peak)} MW on ${dl(pk.d)}${pk.pk!=null?' at '+L48[pk.pk]:''}.`);
+  if(cx)out.push(`Energy consumed totalled ${f1(tot(R,'cons'))} MU over ${n} day(s), averaging ${f1(mean(R,'cons'))} MU/day; highest on ${dl(cx.d)} (${f1(cx.cons)} MU)${cn&&cn.d!==cx.d?`, lowest on ${dl(cn.d)} (${f1(cn.cons)} MU)`:''}.`);
+  const hd=R.filter(r=>r.hyd!=null&&r.cons);if(hd.length){const hs=sum(hd.map(r=>r.hyd));out.push(`Hydro met about ${f1(hs/sum(hd.map(r=>r.cons))*100)}% of consumption on the ${hd.length} day(s) with Energy Log hydro data (${f1(hs)} MU).`)}
+  const Pu=tot(R,'pur'),Su=tot(R,'sur');if(Pu!=null||Su!=null)out.push(`Purchase was ${f1(Pu)} MU and surrender ${f1(Su)} MU – a net ${f1((Pu||0)-(Su||0))} MU of purchase.`);
+  const da=mean(R,'dam'),ra=mean(R,'rtm');if(da!=null||ra!=null)out.push(`IEX averaged ₹${f2(da)}/kWh in DAM and ₹${f2(ra)}/kWh in RTM${da!=null&&ra!=null?` (RTM ${ra<da?'cheaper':'costlier'} by ₹${f2(Math.abs(ra-da))})`:''}.`);
+  trend('Daily consumption','cons','MU')}
+ if(tab==='dem'&&D.length){
+  const pk=best(D,'peak'),lo=best(D.filter(r=>r.min!=null),'min',0),av=mean(D,'avg'),mp=mean(D,'peak');
+  out.push(`Highest demand was ${f1(pk.peak)} MW on ${dl(pk.d)}${pk.pk!=null?' at '+L48[pk.pk]:''}; the mean daily highest was ${f1(mp)} MW over ${D.length} day(s).`);
+  if(lo)out.push(`Lowest demand was ${f1(lo.min)} MW on ${dl(lo.d)}; the mean daily average was ${f1(av)} MW.`);
+  if(av)out.push(`Load factor (mean daily average ÷ highest demand) was ${f1(av/pk.peak*100)}%; ${D.filter(r=>r.peak>=pk.peak*.95).length} day(s) came within 5% of the highest demand.`);
+  trend('Daily highest demand','peak','MW');
+  const sx=D.find(r=>r.d===S.day&&DB.e[r.d]);if(sx)out.push(`Selected day ${dl(S.day)}: highest ${f1(sx.peak)} MW at ${L48[sx.pk]}, average ${f1(sx.avg)} MW, lowest ${f1(sx.min)} MW – ${sx.peak>=mp?'above':'below'} the period's mean daily highest by ${f1(Math.abs(sx.peak-mp))} MW.`)}
+ if(tab==='iex'){const X=R.filter(r=>r.dam!=null||r.rtm!=null);if(X.length){
+  const da=mean(X,'dam'),ra=mean(X,'rtm'),dh=best(X,'dam'),dc=best(X,'dam',0),both=X.filter(r=>r.dam!=null&&r.rtm!=null);
+  out.push(`DAM averaged ₹${f2(da)}/kWh and RTM ₹${f2(ra)}/kWh over ${X.length} day(s).`);
+  if(dh)out.push(`Costliest DAM day was ${dl(dh.d)} (₹${f2(dh.dam)}/kWh) and cheapest ${dl(dc.d)} (₹${f2(dc.dam)}/kWh).`);
+  if(both.length)out.push(`RTM was cheaper than DAM on ${both.filter(r=>r.rtm<r.dam).length} of ${both.length} day(s) that have both prices.`);
+  trend('DAM price','dam','₹/kWh',2);
+  const sx=X.find(r=>r.d===S.day),x=DB.iex[S.day]?.D;
+  if(sx&&x&&sx.dam!=null){const q=x.p.map((v,i)=>[v,i]).filter(a=>a[0]!=null),hi=q.reduce((a,b)=>b[0]>a[0]?b:a),lo=q.reduce((a,b)=>b[0]<a[0]?b:a);
+   out.push(`Selected day ${dl(S.day)}: DAM averaged ₹${f2(sx.dam)}/kWh (${sg(sx.dam-da,2)} against the period average); highest 15-minute price ₹${f2(hi[0]/1000)}/kWh at ${L96[hi[1]]}, lowest ₹${f2(lo[0]/1000)}/kWh at ${L96[lo[1]]}.`)}}}
+ if(tab==='hyd'){const H=R.filter(r=>r.hw!=null);
+  if(H.length){const hi=H.reduce((a,b)=>b.hw>a.hw?b:a),lo=H.reduce((a,b)=>b.hw<a.hw?b:a);out.push(`${WN[S.w]}: hydro totalled ${f2(sum(H.map(r=>r.hw)))} MU over ${H.length} day(s), averaging ${f2(avg(H.map(r=>r.hw)))} MU/day; highest on ${dl(hi.d)} (${f2(hi.hw)} MU), lowest on ${dl(lo.d)} (${f2(lo.hw)} MU).`)}
+  const Pu=tot(R,'pur'),Su=tot(R,'sur');if(Pu!=null||Su!=null)out.push(`Purchase was ${f2(Pu)} MU and surrender ${f2(Su)} MU – a net ${f2((Pu||0)-(Su||0))} MU of purchase.`);
+  trend('Hydro','hw','MU',2)}
+ return out}
+function keyInf(){const ms=MS(),M=S.mode==='m'?[]:S.mode==='a'?ms:cm();
+ if(S.mode==='m'||M.length<2)return infDays(S.tab,(S.mode==='m'?range():alld().filter(d=>!M.length||d.startsWith(M[0]))).map(daily));
+ return infMonths(S.tab,M)}
 function render(){const all=alld(),ms=MS();if(S.mode==='m'&&!ms.includes(S.mo))S.mo=ms.at(-1)||'';const cmpM=S.mode==='c'&&ms.length?cm():[];
  $('#mo').innerHTML=ms.map(m=>`<option value=${m}${m===S.mo?' selected':''}>${mname(m)}</option>`).join('');
  $('#chips').innerHTML=ms.map(m=>`<button class="chip${cmpM.includes(m)?' on':''}" data-m=${m}>${msh(m)}</button>`).join('');
@@ -490,6 +540,7 @@ function render(){const all=alld(),ms=MS();if(S.mode==='m'&&!ms.includes(S.mo))S
  else{const u=lastUpd();if(u)$('#sub').textContent+=' · Last updated '+fmtT(u)}
  const nt=[];if(S.msg)nt.push(S.msg);if(SYNC.err)nt.push(SYNC.err);$('#nt').hidden=!nt.length;$('#nt').textContent=nt.join(' ');
  const v=lc?V.lc():(all.length||S.tab==='data')?(S.mode==='m'?V[S.tab](range().map(daily)):S.mode==='a'?VA[S.tab]():VC[S.tab]()):EMPTY(!ME.up?'No data has been published yet. Please check back soon.':'No data yet. Click <b>Import files</b> (or drop files anywhere on the page): Energy Log, Statistics, IEX snapshot, Purchase/Surrender workbook, SLDC PDF, or a .zip of them.');
+ if(!lc&&S.tab!=='data'&&all.length&&!v.h.includes('Key inferences')){const k=keyInf();if(k.length)v.h+=card('Key inferences',`<ul>${k.map(x=>`<li>${x}</li>`).join('')}</ul>`)}
  $('#v').innerHTML=v.h;v.d();
  if(S.scroll){S.scroll=false;requestAnimationFrame(()=>{const f=$('.fc');f?f.scrollIntoView({block:'center',behavior:'smooth'}):window.scrollTo({top:0,behavior:'smooth'})})}}
 const touch=r=>(r.date?[r.date]:Object.keys(r.days||{})).forEach(d=>touched.push(d));let touched=[];
