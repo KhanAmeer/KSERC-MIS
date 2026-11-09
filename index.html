@@ -32,7 +32,7 @@ body{font:14px/1.5 'Public Sans',-apple-system,BlinkMacSystemFont,'Segoe UI',Rob
 .sub{color:var(--muted);font-size:.8125rem;margin-top:2px}.who{font-size:.75rem;color:var(--secondary);margin-top:2px}
 
 /* buttons, groups, fields */
-.btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;min-height:34px;padding:.4375rem 1rem;font-family:inherit;font-size:.8125rem;font-weight:500;line-height:1.5;color:#fff;background:var(--primary);border:1px solid var(--primary);border-radius:.375rem;box-shadow:0 .125rem .25rem 0 rgba(105,108,255,.4);cursor:pointer;transition:all .15s ease-in-out}
+.btn{display:inline-flex;align-items:center;justify-content:center;gap:.4rem;min-height:34px;padding:.4375rem 1rem;font-family:inherit;font-size:.8125rem;font-weight:500;line-height:1.5;color:#fff;background:var(--primary);border:1px solid var(--primary);border-radius:.375rem;box-shadow:0 .125rem .25rem 0 rgba(105,108,255,.4);cursor:pointer;text-decoration:none;transition:all .15s ease-in-out}
 .btn:hover{background:var(--primary-d);border-color:var(--primary-d)}.btn:disabled{opacity:.65;cursor:wait}
 .btn.sec{background:transparent;color:var(--primary);box-shadow:none}.btn.sec:hover{background:var(--primary);color:#fff}
 #so{color:var(--secondary);border-color:var(--secondary)}#so:hover{background:var(--secondary);border-color:var(--secondary);color:#fff}
@@ -108,8 +108,8 @@ td.ok{color:var(--success-d);text-align:center;font-weight:700}td.no{color:var(-
  .ov{align-items:flex-end;padding:0}.mb{width:100%;max-height:92vh;border-radius:1rem 1rem 0 0}
 }
 .rng{display:flex;align-items:center;gap:.5rem;color:var(--muted);font-size:.8125rem}.rng input.sel{width:150px;margin:0}
-.lcimgs img{display:block;width:100%;height:auto;border:1px solid var(--border);border-radius:.375rem;background:#fff}.lcimgs img+.lcap{margin-top:1rem}.lcap{margin:0 0 .5rem;font-size:.75rem;font-weight:600;color:var(--secondary);text-transform:uppercase;letter-spacing:.4px}
-@media(max-width:720px){.rng input.sel{flex:1;width:auto}}
+.lcpdf{display:block;width:100%;height:88vh;min-height:620px;border:1px solid var(--border);border-radius:.375rem;background:#fff}
+@media(max-width:720px){.rng input.sel{flex:1;width:auto}.lcpdf{height:75vh;min-height:480px}}
 </style></head><body><div class=layout-wrapper>
 <aside class=layout-menu id=tabw><div class=app-brand><div class=brand>Kerala Power MIS</div></div><div class=lbl>Section</div><div class=seg id=tabs><button data-v=sum>Summary</button><button data-v=dem>Demand</button><button data-v=hyd><span class=full>Hydro · Purchase · Surrender</span><span class=short>Hydro</span></button><button data-v=iex>IEX<span class=full> prices</span></button><button data-v=lc><span class=full>Load curves</span><span class=short>Curves</span></button><button data-v=data>Data</button></div></aside>
 <div class=layout-page><div class=app>
@@ -447,47 +447,41 @@ VC.iex=()=>{const ms=cm();return{h:card('Month comparison',ct('iex',ms))+ch('c1'
 VA.data=()=>{const ms=MS(),T=mstat('');return{h:kp(kpi('Energy Log',T.cE,'days'),kpi('Statistics',T.cS,'days'),kpi('SLDC PDF',T.cP,'days'),kpi('Purchase / Surrender',T.cPS,'days'),kpi('IEX DAM',T.cD,'days'),kpi('IEX RTM',T.cR,'days'),kpi('KSEBL LGB projection',Object.keys(DB.lgb).length,'months'))+card('Month-wise data coverage (days imported)',mt('data',ms)),d(){}}};
 VC.data=()=>({h:card('Month comparison · data coverage (days imported)',ct('data',cm())),d(){}});
 
-/* ---------- LOAD CURVES: daily SLDC load-curve PDFs, stored as page images and loaded only for the selected dates ---------- */
-const LC={days:null,imgs:{},err:'',load:false,log:[]},pdfReady=()=>pdfWorker();
-const lcMissing=e=>/load_curves|does not exist|schema cache/i.test(e||''),lcDate=d=>new Date(d+'T00:00:00Z').toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'long',year:'numeric',timeZone:'UTC'});
+/* ---------- LOAD CURVES: the original daily SLDC load-curve PDFs are stored in Supabase Storage (bucket 'load-curves')
+   and shown in the browser's own PDF viewer at full quality. Table 'load_curve_pdfs' lists one file per day. ---------- */
+const LC={days:null,meta:{},err:'',log:[]},pdfReady=()=>pdfWorker(),LCB='load-curves';
+const lcMissing=e=>/load_curve|does not exist|schema cache|bucket/i.test(e||''),lcDate=d=>new Date(d+'T00:00:00Z').toLocaleDateString('en-GB',{weekday:'short',day:'numeric',month:'long',year:'numeric',timeZone:'UTC'});
 const lcLog=(m,c)=>{const h=`<div${c?` class=${c}`:''}>${m}</div>`;LC.log.push(h);const e=$('#lcs');if(e){e.insertAdjacentHTML('beforeend',h);e.scrollTop=1e9}};
-async function lcDays(){const {data,error}=await sb.from('load_curves').select('day').eq('page',0).order('day',{ascending:true});LC.err=error?error.message:'';LC.days=error?[]:data.map(r=>r.day)}
-async function lcFetch(){const want=LC.days.filter(d=>d>=S.lf&&d<=S.lt).slice(0,31).filter(d=>!LC.imgs[d]);if(!want.length)return;LC.load=true;
- try{for(let i=0;i<want.length;i+=3){const ch=want.slice(i,i+3),{data,error}=await sb.from('load_curves').select('day,page,img,w,h,cap').in('day',ch).order('day',{ascending:true}).order('page',{ascending:true});if(error)throw new Error(error.message);ch.forEach(d=>LC.imgs[d]=data.filter(r=>r.day===d).sort((a,b)=>a.page-b.page));render()}}
- catch(e){LC.err=e.message}finally{LC.load=false}}
+const lcUrl=d=>{const m=LC.meta[d];return sb.storage.from(LCB).getPublicUrl(m.path).data.publicUrl+'?v='+encodeURIComponent(m.updated_at||'')};
+async function lcDays(){const {data,error}=await sb.from('load_curve_pdfs').select('day,path,updated_at').order('day',{ascending:true});
+ LC.err=error?error.message:'';LC.days=error?[]:data.map(r=>r.day);LC.meta={};(data||[]).forEach(r=>LC.meta[r.day]=r)}
 V.lc=()=>{
  if(LC.days===null){lcDays().then(()=>{if(!S.lt&&LC.days.length)S.lf=S.lt=LC.days.at(-1);render()});return{h:'<div class=card><p class=empty>Loading load curves…</p></div>',d(){}}}
  const up=ME.up?card('Upload load curve PDF',`<label id=lcdz class=dz for=lcf>Click to choose the daily load curve PDF(s), or drop them here<input id=lcf type=file accept=".pdf" multiple hidden></label><div id=lcs class=il>${LC.log.join('')}</div>`):'';
- if(LC.err&&lcMissing(LC.err))return{h:up+card('Load curves',`<p class=sub>${ME.up?'The load curve table has not been created in Supabase yet. Run the load_curves SQL, then reload this page.':'Load curves are not available yet. Please check back soon.'}</p>`),d(){}};
+ if(LC.err&&lcMissing(LC.err))return{h:up+card('Load curves',`<p class=sub>${ME.up?'The load_curve_pdfs table / load-curves storage bucket has not been created in Supabase yet. Run the load curve SQL, then reload this page.':'Load curves are not available yet. Please check back soon.'}</p>`),d(){}};
  if(!LC.days.length)return{h:up+card('Load curves','<p class=empty>No load curve PDFs have been uploaded yet.</p>'),d(){}};
- const inR=LC.days.filter(d=>d>=S.lf&&d<=S.lt),shown=inR.slice(0,31);if(shown.some(d=>!LC.imgs[d])&&!LC.load)lcFetch().then(()=>render());
- const note=!inR.length?`<p class=empty>No load curve was uploaded for the selected dates. Uploaded dates run from ${lcDate(LC.days[0])} to ${lcDate(LC.days.at(-1))}.</p>`:inR.length>31?`<p class=pr>${inR.length} dates have a load curve in this range. Showing the first 31 – narrow the range to see the others.</p>`:'';
- return{h:up+(note?card('Selected dates',note):'')+shown.map(d=>{const P=LC.imgs[d];return card(lcDate(d),P?`<div class=lcimgs>${P.map(p=>(p.cap?`<div class=lcap>${p.cap}</div>`:'')+`<img src="${p.img}" width="${p.w}" height="${p.h}" alt="Load curve ${d}">`).join('')}</div>`:'<p class=empty>Loading…</p>')}).join(''),
+ const inR=LC.days.filter(d=>d>=S.lf&&d<=S.lt),shown=inR.slice(0,10);
+ const note=!inR.length?`<p class=empty>No load curve was uploaded for the selected dates. Uploaded dates run from ${lcDate(LC.days[0])} to ${lcDate(LC.days.at(-1))}.</p>`:inR.length>10?`<p class=pr>${inR.length} dates have a load curve in this range. Showing the first 10 – narrow the range to see the others.</p>`:'';
+ return{h:up+(note?card('Selected dates',note):'')+shown.map(d=>{const u=lcUrl(d);
+   return card(lcDate(d),`<iframe class=lcpdf src="${u}#view=FitH" title="Load curve ${d}" loading=lazy></iframe><p class=sub style="margin-top:8px">If the PDF does not show on your device, use <b>Open / download</b>.</p>`,`<a class="btn sec" href="${u}" target=_blank rel=noopener>Open / download</a>`)}).join(''),
   d:()=>{const z=$('#lcdz');if(z){['dragover','dragenter'].forEach(n=>z.addEventListener(n,e=>{e.preventDefault();z.classList.add('dg')}));['dragleave','drop'].forEach(n=>z.addEventListener(n,()=>z.classList.remove('dg')))}}}};
-function trimCanvas(c){const g=c.getContext('2d'),W=c.width,H=c.height,d=g.getImageData(0,0,W,H).data;let x0=W,y0=H,x1=0,y1=0;   // crop the white margins of a rendered page
- for(let y=0;y<H;y++)for(let x=0;x<W;x++){const i=(y*W+x)*4;if(d[i]<245||d[i+1]<245||d[i+2]<245){if(x<x0)x0=x;if(x>x1)x1=x;if(y<y0)y0=y;if(y>y1)y1=y}}
- if(x1<=x0||y1<=y0)return c;const p=14;x0=Math.max(0,x0-p);y0=Math.max(0,y0-p);x1=Math.min(W,x1+p);y1=Math.min(H,y1+p);
- const o=document.createElement('canvas');o.width=x1-x0;o.height=y1-y0;const og=o.getContext('2d');og.fillStyle='#fff';og.fillRect(0,0,o.width,o.height);og.drawImage(c,x0,y0,o.width,o.height,0,0,o.width,o.height);return o}
 async function lcUpload(files){if(!ME.up){alert('Only admins can upload load curves.');return}
  await pdfReady();let ok=0;const got=[];lcLog(`Reading ${files.length} file(s)…`);
  for(const f of files){if(!/\.pdf$/i.test(f.name)){lcLog(`Skipped ${f.name} (not a PDF)`,'wn');continue}
-  try{const pdf=await pdfjsLib.getDocument({data:new Uint8Array(await f.arrayBuffer())}).promise,pages=[];let txt='';
-   for(let i=1;i<=pdf.numPages;i++){const pg=await pdf.getPage(i),pt=(await pg.getTextContent()).items.map(x=>x.str).join(' ');txt+=pt+' ';
-    const v0=pg.getViewport({scale:1}),vp=pg.getViewport({scale:1100/v0.width}),c=document.createElement('canvas');c.width=Math.round(vp.width);c.height=Math.round(vp.height);
-    const g=c.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,c.width,c.height);await pg.render({canvasContext:g,viewport:vp}).promise;const t=trimCanvas(c);
-    pages.push({img:t.toDataURL('image/jpeg',.76),w:t.width,h:t.height,cap:((/Kerala Demand,\s?Generation and Import|IEX Market Analysis|Estimation\s+vs\s+Actual Demand For the Day/i.exec(pt)||[])[0]||'Page '+i).replace(/\s+/g,' ')})}
-   const d=pdfDate(txt,f.name);if(!d)throw new Error('could not find the report date in the PDF');
-   for(let i=0;i<pages.length;i++){const {error}=await sb.from('load_curves').upsert({day:d,page:i,img:pages[i].img,w:pages[i].w,h:pages[i].h,cap:pages[i].cap,updated_at:new Date().toISOString()});if(error)throw new Error(error.message)}
-   await sb.from('load_curves').delete().eq('day',d).gte('page',pages.length);
-   LC.imgs[d]=pages.map((p,i)=>({...p,day:d,page:i}));if(LC.days&&!LC.days.includes(d)){LC.days.push(d);LC.days.sort()}got.push(d);ok++;
-   lcLog(`✓ ${f.name} → ${lcDate(d)}: ${pages.length} page(s) saved (${Math.round(pages.reduce((a,p)=>a+p.img.length,0)*.75/1024)} KB)`,'ok')}
+  try{const buf=await f.arrayBuffer(),pdf=await pdfjsLib.getDocument({data:new Uint8Array(buf.slice(0))}).promise;let txt='';
+   for(let i=1;i<=pdf.numPages;i++)txt+=(await(await pdf.getPage(i)).getTextContent()).items.map(x=>x.str).join(' ')+' ';   // text is read only to find the report date
+   const d=pdfDate(txt,f.name);if(!d)throw new Error('could not find the report date in the PDF or the file name');
+   const path=d+'.pdf',{error:e1}=await sb.storage.from(LCB).upload(path,new Blob([buf],{type:'application/pdf'}),{upsert:true,contentType:'application/pdf',cacheControl:'60'});if(e1)throw new Error(e1.message);
+   const now=new Date().toISOString(),{error:e2}=await sb.from('load_curve_pdfs').upsert({day:d,path,name:f.name,size:f.size,pages:pdf.numPages,updated_at:now});if(e2)throw new Error(e2.message);
+   LC.meta[d]={day:d,path,updated_at:now};if(LC.days&&!LC.days.includes(d)){LC.days.push(d);LC.days.sort()}got.push(d);ok++;
+   lcLog(`✓ ${f.name} → ${lcDate(d)}: ${pdf.numPages} page(s), original PDF saved (${Math.round(f.size/1024)} KB)`,'ok')}
   catch(e){lcLog(`✗ ${f.name}: ${e.message}`,'er')}}
  if(ok){got.sort();S.lf=got[0];S.lt=got.at(-1);LC.err='';lcLog(`Done. Showing ${got.length>1?got.length+' dates':lcDate(got[0])}.`,'ok');S.scroll=false;render()}}
 function render(){const all=alld(),ms=MS();if(S.mode==='m'&&!ms.includes(S.mo))S.mo=ms.at(-1)||'';const cmpM=S.mode==='c'&&ms.length?cm():[];
  $('#mo').innerHTML=ms.map(m=>`<option value=${m}${m===S.mo?' selected':''}>${mname(m)}</option>`).join('');
  $('#chips').innerHTML=ms.map(m=>`<button class="chip${cmpM.includes(m)?' on':''}" data-m=${m}>${msh(m)}</button>`).join('');
  [['#tabs',S.tab],['#w',S.w],['#md',S.mode]].forEach(([s,v])=>document.querySelectorAll(s+' button').forEach(b=>b.classList.toggle('on',b.dataset.v===v)));
- const lc=S.tab==='lc';$('#md').parentElement.hidden=lc;$('#mbox').hidden=lc||S.mode!=='m';$('#cbox').hidden=lc||S.mode!=='c';$('#wbox').hidden=S.tab!=='hyd';$('#lbox').hidden=!lc;
+ const lc=S.tab==='lc';$('#pdf').hidden=lc;$('#md').parentElement.hidden=lc;$('#mbox').hidden=lc||S.mode!=='m';$('#cbox').hidden=lc||S.mode!=='c';$('#wbox').hidden=S.tab!=='hyd';$('#lbox').hidden=!lc;
  if(lc){$('#lf').value=S.lf;$('#lt').value=S.lt;if(LC.days&&LC.days.length){$('#lf').min=$('#lt').min=LC.days[0];$('#lf').max=$('#lt').max=LC.days.at(-1)}}
  const ds=S.mode==='m'?range():S.mode==='a'?all:cmpM.flatMap(m=>all.filter(d=>d.startsWith(m)));
  $('#h1').textContent=TT[S.tab]+' · '+(lc?(S.lt?(S.lf===S.lt?S.lf:S.lf+' to '+S.lt):'no dates yet'):S.mode==='m'?(S.mo?mname(S.mo):'no data'):S.mode==='a'?'all months':'comparison');
@@ -561,7 +555,6 @@ function buildPDF(){
  const doCard=c=>{const h=c.querySelector('h2');H2(h?h.textContent:'');[...c.children].forEach(e=>{const k=e.className;
    if(k==='stats')stats([...e.children]);else if(k==='cv')image(e.firstChild);else if(k==='sc')table(e.firstChild);else if(k==='lg'){T(e.textContent.replace(/\s+/g,' '),M,y+9,8.5,{c:'#566a7f'});y+=18}
    else if(e.tagName==='UL')e.querySelectorAll('li').forEach(li=>{const ls=wr(li.textContent,CW-14,9);need(ls.length*12+6);RC(M+2,y+3,3,3,'#696cff');ls.forEach((l,j)=>T(l,M+12,y+9+j*12,9));y+=ls.length*12+5});
-   else if(k==='lcimgs')[...e.children].forEach(x=>{if(x.tagName==='IMG'){if(!x.naturalWidth)return;const q=document.createElement('canvas');q.width=x.naturalWidth;q.height=x.naturalHeight;q.getContext('2d').drawImage(x,0,0);image(q,640)}else{need(26);T(x.textContent,M,y+9,8.5,{c:'#8592a3'});y+=14}});
    else if(k==='pr'||k==='sub'||k==='empty'){wr(e.textContent,CW,9).forEach(l=>{need(14);T(l,M,y+9,9,{c:'#566a7f'});y+=12});y+=4}})};
  np();T('Kerala Power MIS',M,y+9,8.5,{b:1,c:'#696cff'});y+=18;T($('#h1').textContent,M,y+16,16,{b:1});y+=26;T($('#sub').textContent+(S.tab==='hyd'?' · '+WN[S.w]:'')+' · generated '+new Date().toLocaleDateString('en-GB'),M,y+9,9.5,{c:'#8592a3'});y+=22;
  [...$('#v').children].forEach(e=>e.classList.contains('kp')?kpis([...e.children]):e.classList.contains('card')&&doCard(e));
@@ -574,14 +567,14 @@ function buildPDF(){
  const xo=imgs.length?' /XObject << '+imgs.map((_,i)=>`/Im${i+1} ${5+i} 0 R`).join(' ')+' >>':'';
  pages.forEach((p,i)=>{const c=base+2*i;sob(c,'',enc(p.join('\n')));ob(c+1,`<< /Type /Page /Parent 2 0 R /MediaBox [0 0 ${W} ${H}] /Resources << /Font << /F1 3 0 R /F2 4 0 R >>${xo} >> /Contents ${c} 0 R >>`)});
  const n=base+2*pages.length,xr=pos;let x='xref\n0 '+n+'\n0000000000 65535 f \n';for(let i=1;i<n;i++)x+=String(off[i]).padStart(10,'0')+' 00000 n \n';put(enc(x+'trailer\n<< /Size '+n+' /Root 1 0 R >>\nstartxref\n'+xr+'\n%%EOF'));
- dl2(new Blob(ch_,{type:'application/pdf'}),S.tab==='lc'?`Kerala_MIS_load_curves_${S.lf}_to_${S.lt}.pdf`:`Kerala_MIS_${S.tab}_${S.mode==='m'?S.mo:S.mode==='a'?'all-months':'compare'}.pdf`)}
+ dl2(new Blob(ch_,{type:'application/pdf'}),`Kerala_MIS_${S.tab}_${S.mode==='m'?S.mo:S.mode==='a'?'all-months':'compare'}.pdf`)}
 
 /* ---------- EVENTS ---------- */
 document.addEventListener('click',e=>{const t=e.target.closest('button');if(!t)return;const g=t.parentElement.id;
  if(g==='tabs'){S.tab=t.dataset.v;render()}else if(g==='w'){S.w=t.dataset.v;render()}else if(g==='k'){S.k=t.dataset.v;render()}else if(g==='md'){S.mode=t.dataset.v;S.msg='';render()}
  else if(g==='chips'){const m=t.dataset.m,i=S.cmp.indexOf(m);if(i>=0)S.cmp.splice(i,1);else if(S.cmp.length<6)S.cmp.push(m);render()}
  else if(t.id==='imp'){$('#ov').hidden=false}else if(t.id==='mx')$('#ov').hidden=true;else if(t.id==='so'){ME.anon?showLogin():signOut()}
- else if(t.id==='pdf'){if(!$('#v canvas')&&!$('#v table')&&!$('#v img')){alert('Nothing to export yet.');return}t.disabled=true;t.textContent='Preparing PDF…';setTimeout(()=>{try{buildPDF()}catch(err){console.error(err);alert('PDF export failed: '+err.message)}t.disabled=false;t.textContent='Export PDF Report'},40)}
+ else if(t.id==='pdf'){if(!$('#v canvas')&&!$('#v table')){alert('Nothing to export yet.');return}t.disabled=true;t.textContent='Preparing PDF…';setTimeout(()=>{try{buildPDF()}catch(err){console.error(err);alert('PDF export failed: '+err.message)}t.disabled=false;t.textContent='Export PDF Report'},40)}
  else if(t.id==='bk')dl2(new Blob([JSON.stringify(DB)],{type:'application/json'}),`Kerala_MIS_backup_${new Date().toISOString().slice(0,10)}.json`);else if(t.id==='rs')$('#rf').click();else if(t.id==='xl')exportXL();
  else if(t.id==='cl'){t.disabled=true;t.textContent='Syncing…';sync(true).then(()=>{render()})}});
 document.addEventListener('change',e=>{const t=e.target;
