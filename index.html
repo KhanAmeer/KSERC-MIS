@@ -125,7 +125,7 @@ td.ok{color:var(--success-d);text-align:center;font-weight:700}td.no{color:var(-
 <div id=lg class=ov hidden><div class=mb style="max-width:420px"><div class=ch><h2>Admin sign in</h2></div><p class=mh>Admin access only. Viewers do not need to sign in. Use the admin email and password. Click outside this box (or press Esc) to go back.</p>
 <form id=lgf><div class=lbl>Email</div><input id=em class=sel type=email autocomplete=username required style="width:100%;margin-bottom:12px"><div class=lbl>Password</div><input id=pw class=sel type=password autocomplete=current-password required style="width:100%;margin-bottom:14px"><div id=lge class=lge></div><button id=lgb class=btn type=submit style="width:100%">Sign in</button></form></div></div>
 <div id=ov class=ov hidden><div class=mb role=dialog aria-modal=true><div class=ch><h2>Import files</h2><button id=mx class="btn sec" type=button>Close</button></div>
-<p class=mh>Drop any mix of: daily <b>Energy Log</b> (.xls), <b>Statistics-SERC</b> (.xls), <b>IEX DAM / RTM snapshot</b> (.xlsx), the <b>KSEBL LGB projection</b> workbook (.xlsx), the <b>Purchase &amp; Surrender</b> workbook (.xlsx), daily <b>SLDC PDF</b>, or a <b>.zip</b> of them. Files are recognised automatically. Import once – the numbers are saved to the shared database and every section updates for everyone viewing the dashboard. Every section (Summary, Demand, Hydro, IEX, Data) updates from the same data. Files already imported are skipped automatically; a changed file or a newer version of the monthly workbook is re-read and overwrites the days it contains. Energy Log file names need the date (e.g. Energy_log_for03_11_2026.xls).</p>
+<p class=mh>Drop any mix of: daily <b>Energy Log</b> (.xls), <b>Statistics-SERC</b> (.xls), <b>IEX DAM / RTM snapshot</b> (.xlsx), the <b>KSEBL LGB projection</b> workbook (.xlsx), the <b>Purchase &amp; Surrender</b> workbook (.xlsx), daily <b>SLDC PDF</b> (the same file is also saved as that day's Load curve – no separate upload), or a <b>.zip</b> of them. Files are recognised automatically. Import once – the numbers are saved to the shared database and every section updates for everyone viewing the dashboard. Every section (Summary, Demand, Hydro, IEX, Data) updates from the same data. Files already imported are skipped automatically; a changed file or a newer version of the monthly workbook is re-read and overwrites the days it contains. Energy Log file names need the date (e.g. Energy_log_for03_11_2026.xls).</p>
 <label id=dz class=dz for=fi>Click to choose files, or drop them here<input id=fi type=file multiple accept=".xls,.xlsx,.xlsm,.pdf,.zip,.json" hidden></label><div id=il class=il></div></div></div>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script><script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script><script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js"></script><script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script><script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
 <script>
@@ -457,7 +457,7 @@ async function lcDays(){const {data,error}=await sb.from('load_curve_pdfs').sele
  LC.err=error?error.message:'';LC.days=error?[]:data.map(r=>r.day);LC.meta={};(data||[]).forEach(r=>LC.meta[r.day]=r)}
 V.lc=()=>{
  if(LC.days===null){lcDays().then(()=>{if(!S.ld&&LC.days.length)S.ld=LC.days.at(-1);render()});return{h:'<div class=card><p class=empty>Loading load curves…</p></div>',d(){}}}
- const up=ME.up?card('Upload load curve PDF',`<label id=lcdz class=dz for=lcf>Click to choose the daily load curve PDF(s), or drop them here<input id=lcf type=file accept=".pdf" multiple hidden></label><div id=lcs class=il>${LC.log.join('')}</div>`):'';
+ const up=ME.up?card('Upload SLDC PDF (load curve + daily figures)',`<label id=lcdz class=dz for=lcf>Click to choose the daily SLDC PDF(s), or drop them here – the figures are read and the PDF is kept as the load curve<input id=lcf type=file accept=".pdf" multiple hidden></label><div id=lcs class=il>${LC.log.join('')}</div>`):'';
  if(LC.err&&lcMissing(LC.err))return{h:up+card('Load curves',`<p class=sub>${ME.up?'The load_curve_pdfs table / load-curves storage bucket has not been created in Supabase yet. Run the load curve SQL, then reload this page.':'Load curves are not available yet. Please check back soon.'}</p>`),d(){}};
  if(!LC.days.length)return{h:up+card('Load curves','<p class=empty>No load curve PDFs have been uploaded yet.</p>'),d(){}};
  const shown=LC.days.includes(S.ld)?[S.ld]:[];
@@ -465,18 +465,21 @@ V.lc=()=>{
  return{h:up+(note?card('Selected date',note):'')+shown.map(d=>{const u=lcUrl(d);
    return card(lcDate(d),`<iframe class=lcpdf src="${u}#view=FitH" title="Load curve ${d}" loading=lazy></iframe><p class=sub style="margin-top:8px">If the PDF does not show on your device, use <b>Open / download</b>.</p>`,`<a class="btn sec" href="${u}" target=_blank rel=noopener>Open / download</a>`)}).join(''),
   d:()=>{const z=$('#lcdz');if(z){['dragover','dragenter'].forEach(n=>z.addEventListener(n,e=>{e.preventDefault();z.classList.add('dg')}));['dragleave','drop'].forEach(n=>z.addEventListener(n,()=>z.classList.remove('dg')))}}}};
+/* one SLDC PDF = figures (purchase, surrender, peak…) AND the load curve: the original file is kept in Storage, the numbers go to the data tables */
+async function lcSave(f,d){const path=d+'.pdf',buf=await f.arrayBuffer(),{error:e1}=await sb.storage.from(LCB).upload(path,new Blob([buf],{type:'application/pdf'}),{upsert:true,contentType:'application/pdf',cacheControl:'60'});if(e1)throw new Error(e1.message);
+ const now=new Date().toISOString(),{error:e2}=await sb.from('load_curve_pdfs').upsert({day:d,path,name:f.name,size:f.size,updated_at:now});if(e2)throw new Error(e2.message);
+ LC.meta[d]={day:d,path,updated_at:now};if(LC.days&&!LC.days.includes(d)){LC.days.push(d);LC.days.sort()}if(!S.ld||d>S.ld)S.ld=d}
+async function sldcPdf(f){const t=await pdfText(f),d=pdfDate(t,f.name);if(!d)throw new Error('could not find the report date in the PDF or the file name');
+ let note='load curve PDF saved';try{await lcSave(f,d)}catch(e){note='load curve PDF NOT saved ('+e.message+')'}
+ let msg;try{msg=apply(pdfParse(t,f.name))}catch(e){msg='no purchase/surrender figures read ('+e.message+')'}return{d,msg,note}}
 async function lcUpload(files){if(!ME.up){alert('Only admins can upload load curves.');return}
- await pdfReady();let ok=0;const got=[];lcLog(`Reading ${files.length} file(s)…`);
+ let ok=0;const got=[];touched=[];lcLog(`Reading ${files.length} file(s)…`);
  for(const f of files){if(!/\.pdf$/i.test(f.name)){lcLog(`Skipped ${f.name} (not a PDF)`,'wn');continue}
-  try{const buf=await f.arrayBuffer(),pdf=await pdfjsLib.getDocument({data:new Uint8Array(buf.slice(0))}).promise;let txt='';
-   for(let i=1;i<=pdf.numPages;i++)txt+=(await(await pdf.getPage(i)).getTextContent()).items.map(x=>x.str).join(' ')+' ';   // text is read only to find the report date
-   const d=pdfDate(txt,f.name);if(!d)throw new Error('could not find the report date in the PDF or the file name');
-   const path=d+'.pdf',{error:e1}=await sb.storage.from(LCB).upload(path,new Blob([buf],{type:'application/pdf'}),{upsert:true,contentType:'application/pdf',cacheControl:'60'});if(e1)throw new Error(e1.message);
-   const now=new Date().toISOString(),{error:e2}=await sb.from('load_curve_pdfs').upsert({day:d,path,name:f.name,size:f.size,pages:pdf.numPages,updated_at:now});if(e2)throw new Error(e2.message);
-   LC.meta[d]={day:d,path,updated_at:now};if(LC.days&&!LC.days.includes(d)){LC.days.push(d);LC.days.sort()}got.push(d);ok++;
-   lcLog(`✓ ${f.name} → ${lcDate(d)}: ${pdf.numPages} page(s), original PDF saved (${Math.round(f.size/1024)} KB)`,'ok')}
+  try{const q=await sldcPdf(f);DB.files[fkey(f)]=Date.now();PEND.files.add(fkey(f));got.push(q.d);ok++;lcLog(`✓ ${f.name} → ${lcDate(q.d)}: ${q.note} · ${q.msg}`,/NOT/.test(q.note)?'er':'ok')}
   catch(e){lcLog(`✗ ${f.name}: ${e.message}`,'er')}}
- if(ok){got.sort();S.ld=got.at(-1);LC.err='';lcLog(`Done. Showing ${lcDate(S.ld)}.`,'ok');S.scroll=false;render()}}
+ if(ok){try{await flush();await cacheSave();lcLog('Figures saved to the shared database.','ok')}catch(e){lcLog('✗ Could not save the figures online: '+e.message,'er')}
+  got.sort();S.ld=got.at(-1);LC.err='';lcLog(`Done. Showing ${lcDate(S.ld)}.`,'ok');S.scroll=false;render()}}
+
 /* ---------- KEY INFERENCES: takeaways under every section except Load curves & Data (month / single day / all months / compare) ---------- */
 const sg=(x,d=1)=>x==null||isNaN(x)?'–':(x>=0?'+':'')+x.toLocaleString('en-IN',{minimumFractionDigits:d,maximumFractionDigits:d});
 const pcg=(a,b)=>a&&b!=null&&a!==0?sg((b-a)/Math.abs(a)*100,1)+'%':'–';
@@ -557,16 +560,16 @@ function apply0(r){
  if(r.t==='st'){DB.st[r.date]={v:r.v};PEND.st.add(r.date);return `Statistics ${r.date}: ${Object.keys(r.v.hs).length} hydro stations`}
  if(r.t==='sl'){DB.sl[r.date]=r.v;PEND.sl.add(r.date);PEND.ps.add(r.date);DB.ps[r.date]={...DB.ps[r.date],pur:r.v.pur,sur:r.v.sur,sale:r.v.sale};return `SLDC PDF ${r.date}: purchase ${r.v.pur}, surrender ${r.v.sur} MU`}}
 async function pdfText(f){await pdfWorker();const pdf=await pdfjsLib.getDocument({data:new Uint8Array(await f.arrayBuffer())}).promise;let t='';for(let i=1;i<=pdf.numPages;i++)t+=(await(await pdf.getPage(i)).getTextContent()).items.map(x=>x.str).join(' ')+' ';return t}
-const UPD={lgb:'Demand (projected highest/average, 48-block load curve, time bands)',e:'Summary · Demand · Hydro',st:'Hydro (station-wise chart)',sl:'Summary · Demand (peak) · Purchase/Surrender',ps:'Summary · Hydro tab (purchase/surrender)',iex:'Summary · IEX prices'},fkey=f=>f.name+'|'+f.size+'|'+f.lastModified;
+const UPD={lgb:'Demand (projected highest/average, 48-block load curve, time bands)',e:'Summary · Demand · Hydro',st:'Hydro (station-wise chart)',sl:'Summary · Demand (peak) · Purchase/Surrender · Load curves',ps:'Summary · Hydro tab (purchase/surrender)',iex:'Summary · IEX prices'},fkey=f=>f.name+'|'+f.size+'|'+f.lastModified;
 async function ingest(files){if(!ME.up){alert('Only uploaders can import files. Ask an uploader to add the data – you will see it here automatically.');return}
  $('#ov').hidden=false;$('#il').textContent='';const L=[];touched=[];
  for(const f of files){if(/\.zip$/i.test(f.name)){try{const z=await JSZip.loadAsync(await f.arrayBuffer()),es=Object.values(z.files).filter(e=>!e.dir&&/\.(xlsx?|xlsm|pdf)$/i.test(e.name)&&!/__MACOSX|\/\._|~\$/.test(e.name));
    for(const e of es)L.push(new File([await e.async('blob')],e.name.split('/').pop(),{lastModified:+e.date}));lg(`Opened ${f.name}: ${es.length} file(s)`)}catch(e){lg(`✗ ${f.name}: ${e.message}`,'er')}}else L.push(f)}
  let ok=0;
  let skip=0;
- for(const f of L){if(DB.files[fkey(f)]){lg(`↺ ${f.name} – already imported earlier, skipped (every section already has this data)`);skip++;continue}
+ for(const f of L){if(!/\.pdf$/i.test(f.name)&&DB.files[fkey(f)]){lg(`↺ ${f.name} – already imported earlier, skipped (every section already has this data)`);skip++;continue}
   try{const x=f.name.split('.').pop().toLowerCase();let r;
-  if(x==='pdf')r=pdfParse(await pdfText(f),f.name);else if(/^xls[xm]?$/.test(x))r=parseWB(XLSX.read(await f.arrayBuffer(),{type:'array'}),f.name);else if(x==='json'){await restore(await f.text());ok++;continue}else{lg(`Skipped ${f.name} (unsupported type)`,'wn');continue}
+  if(x==='pdf'){const q=await sldcPdf(f);lg(`✓ ${f.name} → SLDC PDF ${q.d}: ${q.msg} · ${q.note} · updates: ${UPD.sl}`,/NOT/.test(q.note)?'wn':'');DB.files[fkey(f)]=Date.now();PEND.files.add(fkey(f));ok++;continue}else if(/^xls[xm]?$/.test(x))r=parseWB(XLSX.read(await f.arrayBuffer(),{type:'array'}),f.name);else if(x==='json'){await restore(await f.text());ok++;continue}else{lg(`Skipped ${f.name} (unsupported type)`,'wn');continue}
   lg(`✓ ${f.name} → ${apply(r)} · updates: ${UPD[r.t]}`);DB.files[fkey(f)]=Date.now();PEND.files.add(fkey(f));ok++}catch(e){lg(`✗ ${f.name}: ${e.message}`,'er')}}
  if(ok){lg('Saving to the shared database…');try{await flush();await cacheSave();goTo(touched);render();lg(`Done: ${ok} file(s) imported and saved online – everyone with access now sees it. ${S.msg}`,'ok');if(!$('#il .er')&&!$('#il .wn'))setTimeout(()=>{$('#ov').hidden=true;S.scroll=true;render()},1800)}catch(e){lg('✗ Could not save online: '+e.message+' – reloading the shared data.','er');await sync(true);render()}}
  else if(skip)lg('All selected files were already imported – nothing to update.','ok');else lg('Nothing was imported.','er')}
