@@ -51,18 +51,6 @@ To connect a separate deployment:
 4. Configure Supabase Authentication and the uploader access records.
 5. Test public read access and authorized upload access before sharing the dashboard.
 
-The application expects these Supabase tables:
-
-- `energy`
-- `statistics_day`
-- `sldc`
-- `purchase_surrender`
-- `iex`
-- `projections`
-- `lgb_profiles`
-- `imported_files`
-- `uploaders`
-
 The repository archive does not include database migration files or SQL definitions for these tables and policies. Set up the backend schema and Row Level Security policies to match the application's read and write operations before deploying a new instance.
 
 The browser-side key is a publishable key, not a secret service-role key. Keep database permissions enforced through Supabase Row Level Security. Never place a service-role key or other private credentials in frontend code.
