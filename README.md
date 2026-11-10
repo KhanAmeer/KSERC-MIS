@@ -19,26 +19,6 @@ The dashboard supports public viewing and authenticated data uploads. Viewers ca
 
 Most dashboard sections support monthly, all-months, and month-comparison views. The Hydro section also supports time windows.
 
-## Supported Source Files
-
-Authorized uploaders can import the following source files:
-
-| Source file | Format | Data processed |
-|---|---|---|
-| Energy Log | `.xls` | 48 half-hourly readings, including Kerala total, hydro, total import, solar, and wind where available |
-| Statistics-SERC | `.xls` | Daily statistics, including hydro stations, internal generation, net import, and consumption |
-| IEX DAM / RTM snapshot | `.xlsx` | 15-minute market prices, volume, purchase, and sell data |
-| KSEBL LGB projection workbook | `.xlsx` | Monthly 15-minute projected peak and average demand profiles |
-| Purchase & Surrender workbook | `.xlsx` | Daily purchase, surrender, and sale values where present |
-| SLDC daily report | `.pdf` | Daily demand, consumption, generation, purchase, surrender, and related report figures |
-| ZIP archive | `.zip` | A batch of supported Excel and PDF source files |
-
-The Energy Log filename must include its report date. For example: `Energy_log_for03_11_2026.xls`.
-
-The KSEBL LGB workbook filename should include the financial year, such as `2026-27`, when the year is not available from the workbook content.
-
-The project is a static web application. There is no frontend package installation or build command in the repository.
-
 ### Backend Configuration
 
 The application connects to Supabase from `index.html`. The current source contains the Supabase project URL and a publishable client key.
