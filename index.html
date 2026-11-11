@@ -239,7 +239,7 @@ function pdfParse(t,fn){
 const SB_URL='https://wrctfyetnixeoaofingo.supabase.co',SB_KEY='sb_publishable_Mn8am94d8ffaPKYJgyVdsA_llHc6eiQ';   // publishable key: safe to be public, data is protected by login + Row Level Security
 const sb=supabase.createClient(SB_URL,SB_KEY,{auth:{persistSession:true,autoRefreshToken:true,detectSessionInUrl:false}});
 const TABLES=['e','st','sl','ps','iex','proj','files','lgb'],DB0=()=>({e:{},st:{},sl:{},ps:{},iex:{},proj:{},files:{},lgb:{},meta:{}});
-let DB=DB0(),S={tab:'sum',mode:'m',mo:'',cmp:[],day:null,w:'00-24',k:'d',ld:'',focus:null,msg:'',scroll:false},ME={id:null,email:'',up:false},SYNC={err:'',wm:{},busy:false,timer:null};
+let DB=DB0(),S={tab:'sum',mode:'m',mo:'',cmp:[],day:null,w:'00-24',k:'d',kd:'d',ks:'d',ld:'',focus:null,msg:'',scroll:false},ME={id:null,email:'',up:false},SYNC={err:'',wm:{},busy:false,timer:null};
 const merge=(a,b)=>{for(const k of TABLES)for(const d in b[k]||{})a[k][d]=(k==='iex'||k==='ps')?{...a[k][d],...b[k][d]}:b[k][d]};
 const num0=x=>x==null?null:+x;
 const TB={   // server table -> local structure
@@ -336,7 +336,9 @@ const BANDS=[['00:00–05:00',0,5],['05:00–08:30',5,8.5],['08:30–14:00',8.5,
 function projProfile(days){const ps=[...new Set(days.map(lgbPart).filter(Boolean))];if(!ps.length)return null;
  const pk=L96.map((_,i)=>Math.max(...ps.map(p=>p.pk[i]))),av=L96.map((_,i)=>avg(ps.map(p=>p.av[i])));return{pk,av,pk48:h48(pk),av48:h48(av)}}
 function lgbText(m){const P=lgbParts(m);return P.map((p,i)=>{const h=Math.max(...p.pk),at=p.pk.indexOf(h),a=avg(p.av);return `${P.length>1?(i?'From day 16':'Days 1–15')+': ':''}projected highest <b>${f1(h)} MW</b> (${blk96(at)}), projected average <b>${f1(a)} MW</b> (${f1(a*24/1000)} MU/day)`}).join(' &nbsp;·&nbsp; ')}
-const demTable=D=>card('Daily demand (MW)',`<div class=sc><table><tr><th>Date<th>Highest (MW)<th>At<th>Average (MW)<th>Lowest (MW)<th>Energy (MU)${D.map(r=>`<tr${r.d===S.focus?' class=fc':''}><td>${dl(r.d)}<td>${f1(r.peak)}<td>${r.pk!=null?L48[r.pk]:'–'}<td>${f1(r.avg)}<td>${f1(r.min)}<td>${f2(r.cons)}`).join('')}</table></div>`);
+const srt=(A,f,dir)=>[...A].sort((a,b)=>{const x=f(a),y=f(b);if(x==null&&y==null)return 0;if(x==null)return 1;if(y==null)return -1;return(x-y)*dir});
+const demTable=D=>{const K={dh:[r=>r.peak,-1],da:[r=>r.avg,-1],dl:[r=>r.min,1]},Q=S.kd==='d'||!K[S.kd]?D:srt(D,...K[S.kd]);
+ return card('Daily demand (MW)',`<div class=sc><table><tr><th>Date<th>Highest (MW)<th>At<th>Average (MW)<th>Lowest (MW)<th>Energy (MU)${Q.map(r=>`<tr${r.d===S.focus?' class=fc':''}><td>${dl(r.d)}<td>${f1(r.peak)}<td>${r.pk!=null?L48[r.pk]:'–'}<td>${f1(r.avg)}<td>${f1(r.min)}<td>${f2(r.cons)}`).join('')}</table></div>`,seg('kd',[['d','Date wise'],['dh','Demand highest first'],['da','Highest average first'],['dl','Lowest first']],S.kd))};
 const V={},EMPTY=m=>({h:`<div class=card><p class=empty>${m}</p></div>`,d(){}});
 V.sum=R=>{const pk=best(R,'peak'),lb=R.map(r=>dl(r.d));return{h:kp(kpi('Peak demand',pk?f1(pk.peak)+' MW':'–',pk?dl(pk.d)+(pk.pk!=null?' · '+L48[pk.pk]:''):''),kpi('Energy consumed',f1(tot(R,'cons'))+' MU','avg '+f1(mean(R,'cons'))+' MU/day'),kpi('Hydro generation',f1(tot(R,'hyd'))+' MU','avg '+f1(mean(R,'hyd'))+' MU/day'),kpi('Purchase',f1(tot(R,'pur'))+' MU','avg '+f1(mean(R,'pur'))+' MU/day'),kpi('Surrender',f1(tot(R,'sur'))+' MU','avg '+f1(mean(R,'sur'))+' MU/day'),kpi('IEX DAM average',f2(mean(R,'dam')),'₹/kWh'),kpi('IEX RTM average',f2(mean(R,'rtm')),'₹/kWh'))+card('Daily consumption (MU)',cv('c1'))+card('Hydro vs purchase &amp; surrender (MU per day)',cv('c2')),
  d:()=>{mk('c1','bar',lb,[{label:'Consumption (MU)',data:R.map(r=>r.cons)}]);mk('c2','line',lb,[['hyd','Hydro (MU)',0],['pur','Purchase (MU)',1],['sur','Surrender (MU)',2]].map(([k,n,c])=>({label:n,data:R.map(r=>r[k]),borderColor:P[c],borderWidth:c?2:3,borderDash:c===2?[5,4]:[]})),{y:'MU'})}}};
@@ -379,9 +381,10 @@ V.hyd=R0=>{const w=S.w,[a,b]=WB[w],R=R0.map(r=>{const h=hydW(r);return h==null&&
   SS.length&&mk('c2','bar',SS.map(s=>s[0]),[{label:'MU',data:SS.map(s=>s[1])}],{opt:{indexAxis:'y',plugins:{legend:{display:false}}}})}}};
 
 V.iex=R=>{const X=R.filter(r=>r.dam!=null||r.rtm!=null);if(!X.length)return EMPTY('No IEX data in this selection.');if(!X.find(r=>r.d===S.day))S.day=X.at(-1).d;
- const rowsT=X.map(r=>{const D=iexDay(r.d,'D'),Q=iexDay(r.d,'R');return `<tr${r.d===S.focus?' class=fc':''}><td>${dl(r.d)}<td>${f2(D?.avg)}<td>${f2(D?.mx)}<td>${f2(Q?.avg)}<td>${f2(Q?.mx)}`}).join('');
+ const IK={dh:o=>o.D?.mx,rh:o=>o.Q?.mx,da:o=>o.D?.avg,ra:o=>o.Q?.avg};let XR=X.map(r=>({r,D:iexDay(r.d,'D'),Q:iexDay(r.d,'R')}));if(IK[S.ks])XR=srt(XR,IK[S.ks],-1);
+ const rowsT=XR.map(({r,D,Q})=>`<tr${r.d===S.focus?' class=fc':''}><td>${dl(r.d)}<td>${f2(D?.avg)}<td>${f2(D?.mx)}<td>${f2(Q?.avg)}<td>${f2(Q?.mx)}`).join('');
  return{h:kp(kpi('DAM average',f2(mean(X,'dam')),'₹/kWh'),kpi('RTM average',f2(mean(X,'rtm')),'₹/kWh'),kpi('RTM − DAM',f2(mean(X,'rtm')-mean(X,'dam')),'negative = RTM cheaper'),kpi('Days with prices',X.length))
- +card('Daily average price (₹/kWh)',cv('c1'))+card('15-minute prices (₹/kWh)',cv('c2'),dsel(X.map(r=>r.d)))+card('Daily prices (₹/kWh)',`<div class=sc><table><tr><th>Date<th>DAM average<th>DAM highest<th>RTM average<th>RTM highest${rowsT}</table></div><p class=sub style="margin-top:8px">Average = mean of the day's 96 fifteen-minute prices; highest = the highest 15-minute price of the day.</p>`),
+ +card('Daily average price (₹/kWh)',cv('c1'))+card('15-minute prices (₹/kWh)',cv('c2'),dsel(X.map(r=>r.d)))+card('Daily prices (₹/kWh)',`<div class=sc><table><tr><th>Date<th>DAM average<th>DAM highest<th>RTM average<th>RTM highest${rowsT}</table></div><p class=sub style="margin-top:8px">Average = mean of the day's 96 fifteen-minute prices; highest = the highest 15-minute price of the day.</p>`,seg('ks',[['d','Date wise'],['dh','DAM highest first'],['rh','RTM highest first'],['da','DAM average highest'],['ra','RTM average highest']],S.ks)),
  d:()=>{mk('c1','line',X.map(r=>dl(r.d)),[{label:'DAM',data:X.map(r=>r.dam)},{label:'RTM',data:X.map(r=>r.rtm),borderColor:P[1]}],{y:'₹/kWh'});const p=k=>(DB.iex[S.day]?.[k]?.p||[]).map(v=>v==null?null:v/1000);mk('c2','line',L96,[{label:'DAM',data:p('D')},{label:'RTM',data:p('R'),borderColor:P[1]}],{y:'₹/kWh',pts:0})}}};
 
 V.data=R=>{const A=range(),ck=b=>b?'<td class=ok>✓':'<td class=no>–',n=f=>A.filter(f).length;
@@ -630,7 +633,7 @@ function buildPDF(){
 
 /* ---------- EVENTS ---------- */
 document.addEventListener('click',e=>{const t=e.target.closest('button');if(!t)return;const g=t.parentElement.id;
- if(g==='tabs'){S.tab=t.dataset.v;render()}else if(g==='w'){S.w=t.dataset.v;render()}else if(g==='k'){S.k=t.dataset.v;render()}else if(g==='md'){S.mode=t.dataset.v;S.msg='';render()}
+ if(g==='tabs'){S.tab=t.dataset.v;render()}else if(g==='w'){S.w=t.dataset.v;render()}else if(g==='k'){S.k=t.dataset.v;render()}else if(g==='kd'){S.kd=t.dataset.v;render()}else if(g==='ks'){S.ks=t.dataset.v;render()}else if(g==='md'){S.mode=t.dataset.v;S.msg='';render()}
  else if(g==='chips'){const m=t.dataset.m,i=S.cmp.indexOf(m);if(i>=0)S.cmp.splice(i,1);else if(S.cmp.length<6)S.cmp.push(m);render()}
  else if(t.id==='imp'){$('#ov').hidden=false}else if(t.id==='mx')$('#ov').hidden=true;else if(t.id==='so'){ME.anon?showLogin():signOut()}
  else if(t.id==='pdf'){if(!$('#v canvas')&&!$('#v table')){alert('Nothing to export yet.');return}t.disabled=true;t.textContent='Preparing PDF…';setTimeout(()=>{try{buildPDF()}catch(err){console.error(err);alert('PDF export failed: '+err.message)}t.disabled=false;t.textContent='Export PDF Report'},40)}
