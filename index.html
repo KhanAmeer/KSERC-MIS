@@ -311,7 +311,7 @@ const best=(R,k,mx=1)=>{const c=R.filter(r=>r[k]!=null);return c.length?c.reduce
 const dsel=D=>`<select id=dsel class=sel>${D.map(d=>`<option value=${d}${d===S.day?' selected':''}>${dl(d)}</option>`).join('')}</select>`;
 
 function iexDay(d,k){const x=DB.iex[d]?.[k];if(!x)return null;const i=x.p.map((_,j)=>j).filter(j=>x.p[j]!=null);if(!i.length)return null;
- const p=i.map(j=>x.p[j]/1000),v=i.map(j=>x.v[j]||0),sv=sum(v);return{avg:avg(p),vw:sv?sum(p.map((q,j)=>q*v[j]))/sv:avg(p)}}
+ const p=i.map(j=>x.p[j]/1000),v=i.map(j=>x.v[j]||0),sv=sum(v);return{avg:avg(p),vw:sv?sum(p.map((q,j)=>q*v[j]))/sv:avg(p),mx:Math.max(...p)}}
 function daily(d){const e=DB.e[d],ps=DB.ps[d]||{},sl=DB.sl[d]||{},s=DB.st[d]?.v,o={d};
  if(e){const mw=e.kt.map(v=>v*2);o.peak=Math.max(...mw);o.pk=mw.indexOf(o.peak);o.avg=avg(mw);o.min=Math.min(...mw);o.cons=sum(e.kt)/1000}else{o.cons=sl.cons??s?.cons;o.peak=sl.mdv}
  o.hyd=e?.hy?sum(e.hy)/1000:null;/* hydro: Energy Log only */o.pur=ps.pur??sl.pur;o.sur=ps.sur??sl.sur;o.dam=iexDay(d,'D')?.avg;o.rtm=iexDay(d,'R')?.avg;return o}
@@ -336,6 +336,7 @@ const BANDS=[['00:00–05:00',0,5],['05:00–08:30',5,8.5],['08:30–14:00',8.5,
 function projProfile(days){const ps=[...new Set(days.map(lgbPart).filter(Boolean))];if(!ps.length)return null;
  const pk=L96.map((_,i)=>Math.max(...ps.map(p=>p.pk[i]))),av=L96.map((_,i)=>avg(ps.map(p=>p.av[i])));return{pk,av,pk48:h48(pk),av48:h48(av)}}
 function lgbText(m){const P=lgbParts(m);return P.map((p,i)=>{const h=Math.max(...p.pk),at=p.pk.indexOf(h),a=avg(p.av);return `${P.length>1?(i?'From day 16':'Days 1–15')+': ':''}projected highest <b>${f1(h)} MW</b> (${blk96(at)}), projected average <b>${f1(a)} MW</b> (${f1(a*24/1000)} MU/day)`}).join(' &nbsp;·&nbsp; ')}
+const demTable=D=>card('Daily demand (MW)',`<div class=sc><table><tr><th>Date<th>Highest (MW)<th>At<th>Average (MW)<th>Lowest (MW)<th>Energy (MU)${D.map(r=>`<tr${r.d===S.focus?' class=fc':''}><td>${dl(r.d)}<td>${f1(r.peak)}<td>${r.pk!=null?L48[r.pk]:'–'}<td>${f1(r.avg)}<td>${f1(r.min)}<td>${f2(r.cons)}`).join('')}</table></div>`);
 const V={},EMPTY=m=>({h:`<div class=card><p class=empty>${m}</p></div>`,d(){}});
 V.sum=R=>{const pk=best(R,'peak'),lb=R.map(r=>dl(r.d));return{h:kp(kpi('Peak demand',pk?f1(pk.peak)+' MW':'–',pk?dl(pk.d)+(pk.pk!=null?' · '+L48[pk.pk]:''):''),kpi('Energy consumed',f1(tot(R,'cons'))+' MU','avg '+f1(mean(R,'cons'))+' MU/day'),kpi('Hydro generation',f1(tot(R,'hyd'))+' MU','avg '+f1(mean(R,'hyd'))+' MU/day'),kpi('Purchase',f1(tot(R,'pur'))+' MU','avg '+f1(mean(R,'pur'))+' MU/day'),kpi('Surrender',f1(tot(R,'sur'))+' MU','avg '+f1(mean(R,'sur'))+' MU/day'),kpi('IEX DAM average',f2(mean(R,'dam')),'₹/kWh'),kpi('IEX RTM average',f2(mean(R,'rtm')),'₹/kWh'))+card('Daily consumption (MU)',cv('c1'))+card('Hydro vs purchase &amp; surrender (MU per day)',cv('c2')),
  d:()=>{mk('c1','bar',lb,[{label:'Consumption (MU)',data:R.map(r=>r.cons)}]);mk('c2','line',lb,[['hyd','Hydro (MU)',0],['pur','Purchase (MU)',1],['sur','Surrender (MU)',2]].map(([k,n,c])=>({label:n,data:R.map(r=>r[k]),borderColor:P[c],borderWidth:c?2:3,borderDash:c===2?[5,4]:[]})),{y:'MU'})}}};
@@ -353,7 +354,7 @@ V.dem=R=>{const D=R.filter(r=>r.peak!=null),E=D.filter(r=>DB.e[r.d]),LG=lgbParts
    `Across the 48 half-hour blocks the highest actual demand exceeded the projected Peak profile in ${ex} block(s). This is a strict test: it compares the most extreme day at each block with a single projected profile, so exceedances are expected more often at some times of day.`]}
  const proj=LG?card('KSEBL projection (from the LGB file)',`<div class=pr>${mname(S.mo)}: ${lgbText(S.mo)}</div>`):card('KSEBL projection',S.mo!=='all'?`<div class=pr>For ${mname(S.mo)} (MW): ${ME.up?`highest <input id=pk type=number class=sel value=\"${pr?.h??''}\"> average <input id=pa type=number class=sel value=\"${pr?.a??''}\">`:`highest ${pr?.h??'–'} · average ${pr?.a??'–'}`}</div><p class=sub style="margin-top:8px">Import the KSEBL LGB workbook to load the full projected profile automatically.</p>`:'<p class=sub>Select a single month (top bar) to enter the KSEBL projected highest and average demand.</p>');
  return{h:kp(kpi('Peak demand',f1(B.peak)+' MW',dl(B.d)+(B.pk!=null?' · '+L48[B.pk]:'')),kpi('Lowest demand',Lo?f1(Lo.min)+' MW':'–',Lo?dl(Lo.d):'needs Energy Log'),kpi('Mean daily average',f1(mean(D,'avg'))+' MW',pr?'KSEBL proj. '+f1(pr.a):''),kpi('Mean daily highest',f1(mean(D,'peak'))+' MW',pr?'KSEBL proj. '+f1(pr.h):''),...(pr?[kpi('Days above proj. highest',hi+' / '+D.length),kpi('Days above proj. average',ha+' / '+D.length)]:[]))
- +proj+card('Daily highest, average &amp; lowest demand (MW)',cv('c1'))
+ +proj+card('Daily highest, average &amp; lowest demand (MW)',cv('c1'))+demTable(D)
  +(E.length?(PP?card('Highest demand vs KSEBL projected Peak, by half-hour (MW)',cv('c2'),dsel(E.map(r=>r.d)))+card('Average demand vs KSEBL projected Avg, by half-hour (MW)',cv('c3'))+card('Actual vs projection by KSEBL time band',bands)+card('Key inferences',`<ul>${inf.map(x=>`<li>${x}</li>`).join('')}</ul>`):card('Time-of-day profile (48 × 30-min blocks)',cv('c2'),dsel(E.map(r=>r.d)))):card('Time-of-day profile','<p class=sub>Needs the Energy Log for at least one day in this month.</p>')),
  d:()=>{mk('c1','line',D.map(r=>dl(r.d)),[{label:'Highest',data:D.map(r=>r.peak),borderWidth:3},{label:'Average',data:D.map(r=>r.avg),borderColor:P[1]},{label:'Lowest',data:D.map(r=>r.min),borderColor:P[2]},...(D.some(PF)?[{label:'Proj. highest',data:D.map(r=>PF(r)?.h),borderDash:[6,4],borderColor:P[3],pointRadius:0},{label:'Proj. average',data:D.map(r=>PF(r)?.a),borderDash:[6,4],borderColor:P[4],pointRadius:0}]:[])],{y:'MW'});
   if(!E.length)return;const day=DB.e[S.day].kt.map(v=>v*2);
@@ -378,9 +379,9 @@ V.hyd=R0=>{const w=S.w,[a,b]=WB[w],R=R0.map(r=>{const h=hydW(r);return h==null&&
   SS.length&&mk('c2','bar',SS.map(s=>s[0]),[{label:'MU',data:SS.map(s=>s[1])}],{opt:{indexAxis:'y',plugins:{legend:{display:false}}}})}}};
 
 V.iex=R=>{const X=R.filter(r=>r.dam!=null||r.rtm!=null);if(!X.length)return EMPTY('No IEX data in this selection.');if(!X.find(r=>r.d===S.day))S.day=X.at(-1).d;
- const ms=[...new Set(alld().filter(d=>DB.iex[d]).map(d=>d.slice(0,7)))].map(m=>{const ds=alld().filter(d=>d.startsWith(m)),g=(k,q)=>avg(ds.map(d=>iexDay(d,k)?.[q]).filter(v=>v!=null));return `<tr><td>${mname(m)}<td>${f2(g('D','avg'))}<td>${f2(g('R','avg'))}<td>${f2(g('R','avg')-g('D','avg'))}<td>${f2(g('D','vw'))}<td>${f2(g('R','vw'))}`}).join('');
+ const rowsT=X.map(r=>{const D=iexDay(r.d,'D'),Q=iexDay(r.d,'R');return `<tr${r.d===S.focus?' class=fc':''}><td>${dl(r.d)}<td>${f2(D?.avg)}<td>${f2(D?.mx)}<td>${f2(Q?.avg)}<td>${f2(Q?.mx)}`}).join('');
  return{h:kp(kpi('DAM average',f2(mean(X,'dam')),'₹/kWh'),kpi('RTM average',f2(mean(X,'rtm')),'₹/kWh'),kpi('RTM − DAM',f2(mean(X,'rtm')-mean(X,'dam')),'negative = RTM cheaper'),kpi('Days with prices',X.length))
- +card('Daily average price (₹/kWh)',cv('c1'))+card('15-minute prices (₹/kWh)',cv('c2'),dsel(X.map(r=>r.d)))+card('Month by month (₹/kWh)',`<div class=sc><table><tr><th>Month<th>DAM avg<th>RTM avg<th>Gap<th>DAM vol-wtd<th>RTM vol-wtd${ms}</table></div>`),
+ +card('Daily average price (₹/kWh)',cv('c1'))+card('15-minute prices (₹/kWh)',cv('c2'),dsel(X.map(r=>r.d)))+card('Daily prices (₹/kWh)',`<div class=sc><table><tr><th>Date<th>DAM average<th>DAM highest<th>RTM average<th>RTM highest${rowsT}</table></div><p class=sub style="margin-top:8px">Average = mean of the day's 96 fifteen-minute prices; highest = the highest 15-minute price of the day.</p>`),
  d:()=>{mk('c1','line',X.map(r=>dl(r.d)),[{label:'DAM',data:X.map(r=>r.dam)},{label:'RTM',data:X.map(r=>r.rtm),borderColor:P[1]}],{y:'₹/kWh'});const p=k=>(DB.iex[S.day]?.[k]?.p||[]).map(v=>v==null?null:v/1000);mk('c2','line',L96,[{label:'DAM',data:p('D')},{label:'RTM',data:p('R'),borderColor:P[1]}],{y:'₹/kWh',pts:0})}}};
 
 V.data=R=>{const A=range(),ck=b=>b?'<td class=ok>✓':'<td class=no>–',n=f=>A.filter(f).length;
@@ -534,7 +535,7 @@ function render(){if(S.tab==='data'&&!ME.up)S.tab='sum';const all=alld(),ms=MS()
  $('#mo').innerHTML=ms.map(m=>`<option value=${m}${m===S.mo?' selected':''}>${mname(m)}</option>`).join('');
  $('#chips').innerHTML=ms.map(m=>`<button class="chip${cmpM.includes(m)?' on':''}" data-m=${m}>${msh(m)}</button>`).join('');
  [['#tabs',S.tab],['#w',S.w],['#md',S.mode]].forEach(([s,v])=>document.querySelectorAll(s+' button').forEach(b=>b.classList.toggle('on',b.dataset.v===v)));
- const lc=S.tab==='lc';$('#pdf').hidden=lc;$('#md').parentElement.hidden=lc;$('#mbox').hidden=lc||S.mode!=='m';$('#cbox').hidden=lc||S.mode!=='c';$('#wbox').hidden=S.tab!=='hyd';$('#lbox').hidden=!lc;
+ const lc=S.tab==='lc';$('#pdf').hidden=lc||S.tab==='data';$('#md').parentElement.hidden=lc;$('#mbox').hidden=lc||S.mode!=='m';$('#cbox').hidden=lc||S.mode!=='c';$('#wbox').hidden=S.tab!=='hyd';$('#lbox').hidden=!lc;
  if(lc){$('#ld').value=S.ld;if(LC.days&&LC.days.length){$('#ld').min=LC.days[0];$('#ld').max=LC.days.at(-1)}}
  const ds=S.mode==='m'?range():S.mode==='a'?all:cmpM.flatMap(m=>all.filter(d=>d.startsWith(m)));
  $('#h1').textContent=TT[S.tab]+' · '+(lc?(S.ld?lcDate(S.ld):'no date yet'):S.mode==='m'?(S.mo?mname(S.mo):'no data'):S.mode==='a'?'all months':'comparison');
@@ -603,10 +604,14 @@ function buildPDF(){
  const image=(c,mh=230)=>{const t=document.createElement('canvas');t.width=c.width;t.height=c.height;const g=t.getContext('2d');g.fillStyle='#fff';g.fillRect(0,0,t.width,t.height);g.drawImage(c,0,0);const bin=atob(t.toDataURL('image/jpeg',.92).split(',')[1]),by=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)by[i]=bin.charCodeAt(i);
   let dw=CW,dh=dw*t.height/t.width;if(dh>mh){dh=mh;dw=dh*t.width/t.height}need(dh+10);imgs.push({w:t.width,h:t.height,by});cur.push(`q ${dw.toFixed(2)} 0 0 ${dh.toFixed(2)} ${M} ${(H-y-dh).toFixed(2)} cm /Im${imgs.length} Do Q`);y+=dh+14};
  const table=tb=>{const rows=[...tb.rows].map(r=>({c:r.className,t:[...r.cells].map(c=>c.textContent.trim())})),n=rows[0].t.length,fw=n>5?Math.min(90,CW/n*1.3):CW/n,cw=rows[0].t.map((_,i)=>i?(CW-fw)/(n-1):fw),
-   al=rows[0].t.map((_,i)=>i===0||(rows[1]&&isNaN(parseFloat(rows[1].t[i].replace(/,/g,''))))?'l':'r'),cx=i=>{const s=cw.slice(0,i).reduce((a,b)=>a+b,0);return al[i]==='l'?M+s+5:M+s+cw[i]-5};
-  const hd=()=>{need(40);rows[0].t.forEach((h,i)=>T(h.toUpperCase(),cx(i),y+10,6.5,{b:1,c:'#696cff',al:al[i]}));y+=14;LN(M,y,M+CW,'#696cff');y+=2};hd();
-  rows.slice(1).forEach(r=>{if(y+16>H-40){np();hd()}if(/\blo\b/.test(r.c))RC(M,y,CW,16,'#ffe5e5');else if(/\bhi\b/.test(r.c))RC(M,y,CW,16,'#e8fadf');r.t.forEach((v,i)=>T(v,cx(i),y+11,8,{al:al[i]}));LN(M,y+16,M+CW,'#d9dee3');y+=16});y+=10};
- const doCard=c=>{const h=c.querySelector('h2');H2(h?h.textContent:'');[...c.children].forEach(e=>{const k=e.className;
+   al=rows[0].t.map((_,i)=>i===0||(rows[1]&&isNaN(parseFloat(rows[1].t[i].replace(/,/g,''))))?'l':'r'),cx=i=>{const s=cw.slice(0,i).reduce((a,b)=>a+b,0);return al[i]==='l'?M+s+5:M+s+cw[i]-5},nr=rows.length-1;
+  if(y+16+nr*16+10>H-40&&y>70)np();                                   // a table is never split: if it does not fit in what is left of this page, the whole table moves to the next page
+  const rh=nr*16>H-40-y-26?Math.max(5,(H-40-y-26)/nr):16,fs=Math.min(8,rh-3);   // only a table taller than a whole page is squeezed so that it still stays on one page
+  rows[0].t.forEach((h,i)=>T(h.toUpperCase(),cx(i),y+10,6.5,{b:1,c:'#696cff',al:al[i]}));y+=14;LN(M,y,M+CW,'#696cff');y+=2;
+  rows.slice(1).forEach(r=>{if(/\blo\b/.test(r.c))RC(M,y,CW,rh,'#ffe5e5');else if(/\bhi\b/.test(r.c))RC(M,y,CW,rh,'#e8fadf');r.t.forEach((v,i)=>T(v,cx(i),y+rh*.7,fs,{al:al[i]}));LN(M,y+rh,M+CW,'#d9dee3');y+=rh});y+=10};
+ const doCard=c=>{const h=c.querySelector('h2'),tb=c.querySelector('.sc table');
+  if(tb){let pre=0;for(const e of c.children){if(e.className==='sc')break;if(e.className==='lg')pre+=18}need(24+pre+Math.min(16+(tb.rows.length-1)*16+10,H-120))}   // keep the card title together with its table
+  H2(h?h.textContent:'');[...c.children].forEach(e=>{const k=e.className;
    if(k==='stats')stats([...e.children]);else if(k==='cv')image(e.firstChild);else if(k==='sc')table(e.firstChild);else if(k==='lg'){T(e.textContent.replace(/\s+/g,' '),M,y+9,8.5,{c:'#566a7f'});y+=18}
    else if(e.tagName==='UL')e.querySelectorAll('li').forEach(li=>{const ls=wr(li.textContent,CW-14,9);need(ls.length*12+6);RC(M+2,y+3,3,3,'#696cff');ls.forEach((l,j)=>T(l,M+12,y+9+j*12,9));y+=ls.length*12+5});
    else if(k==='pr'||k==='sub'||k==='empty'){wr(e.textContent,CW,9).forEach(l=>{need(14);T(l,M,y+9,9,{c:'#566a7f'});y+=12});y+=4}})};
